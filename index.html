@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIMurdle — Murder Mystery</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<!-- =============================================
+     TOAST CONTAINER
+============================================= -->
+<div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+<!-- =============================================
+     SCREEN 1: LANDING
+============================================= -->
+<section id="screen-landing" class="screen active" role="main">
+  <div class="stars" aria-hidden="true"></div>
+
+  <div class="landing-badge">🔴 Live Investigation</div>
+
+  <h1 class="landing-title glitch" data-text="AIMurdle">AIMurdle</h1>
+  <p class="landing-subtitle">AI Murder Mystery Challenge</p>
+  <p class="landing-tagline">
+    Uncover the clues. Name the killer. Race against the clock.<br />
+    In AI, even ghosts leave traces. Find them.
+  </p>
+
+  <div class="entry-card">
+    <h2>// Enter Team Credentials</h2>
+    <form id="landing-form" autocomplete="off" novalidate>
+      <div class="form-group">
+        <label for="team-input">Team Name</label>
+        <input
+          type="text"
+          id="team-input"
+          placeholder="e.g. Team Null Pointer"
+          maxlength="40"
+          required
+          spellcheck="false"
+          autocomplete="off"
+        />
+      </div>
+      <button type="submit" class="btn-primary">
+        BEGIN INVESTIGATION →
+      </button>
+    </form>
+  </div>
+
+  <div class="landing-footer">
+    IN AI, EVEN GHOSTS LEAVE TRACES. FIND THEM.
+  </div>
+</section>
+
+<!-- =============================================
+     SCREEN 2: CASE VIEW
+============================================= -->
+<section id="screen-case" class="screen" role="main">
+
+  <!-- Sticky Header -->
+  <header class="case-header">
+    <div class="team-tag">
+      <span class="dot"></span>
+      <span class="team-name" id="header-team-name">Team: —</span>
+    </div>
+
+    <span class="round-badge" id="header-round">Round —</span>
+
+    <div class="timer-bar">
+      <div>
+        <div class="timer-label">Time Remaining</div>
+        <div class="timer-display" id="timer-case">15:00</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <div class="case-hero">
+    <div class="hero-round" id="hero-round">Round —</div>
+    <h1 class="hero-title glitch" id="hero-title" data-text="">—</h1>
+    <div class="hero-subtitle" id="hero-subtitle">—</div>
+    <p class="hero-tagline" id="hero-tagline">—</p>
+
+    <!-- Phase track -->
+    <div class="phase-track" aria-label="Progress">
+      <div class="phase-step active" data-step="0">
+        <div class="step-dot"></div>
+        <div class="step-label">Case Files</div>
+      </div>
+      <div class="phase-connector"></div>
+      <div class="phase-step" data-step="1">
+        <div class="step-dot"></div>
+        <div class="step-label">Questions</div>
+      </div>
+      <div class="phase-connector"></div>
+      <div class="phase-step" data-step="2">
+        <div class="step-dot"></div>
+        <div class="step-label">Submitted</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="case-grid">
+
+    <!-- ── Case File Column ── -->
+    <div class="card case-file-card" style="padding:20px;">
+      <div class="card-label" style="margin-bottom:20px;">📁 Case Dossier</div>
+      <div id="case-file-paper" class="case-file-paper"></div>
+      <div id="hidden-clues-container" class="clue-tiles" style="margin-top:16px;"></div>
+    </div>
+
+    <!-- ── Evidence 1 ── -->
+    <div class="card evidence-card" id="evidence-slot-1" style="padding:20px;"></div>
+
+    <!-- ── Evidence 2 ── -->
+    <div class="card evidence-card" id="evidence-slot-2" style="padding:20px;"></div>
+
+    <!-- ── Evidence 3 (spans 2 cols) ── -->
+    <div class="card evidence-card" id="evidence-slot-3"
+         style="padding:20px; grid-column: 2 / 4;"></div>
+
+    <!-- ── Suspects ── -->
+    <div class="suspects-section" style="grid-column: 2 / 4;">
+      <div class="card-label">🕵️ Suspects</div>
+      <div id="suspects-grid" class="suspects-grid"></div>
+    </div>
+
+  </div>
+
+  <!-- CTA Footer -->
+  <div style="
+    border-top: 1px solid var(--border);
+    background: var(--bg-card);
+    padding: 20px 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  ">
+    <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-dim);letter-spacing:0.2em;text-transform:uppercase;">
+      🔍 Follow the evidence. Trust the patterns.
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">
+        Ready to answer? Lock in your verdict ↓
+      </span>
+      <button id="btn-go-questions" class="btn-primary" style="width:auto;padding:12px 28px;">
+        SUBMIT YOUR VERDICT →
+      </button>
+    </div>
+  </div>
+
+</section>
+
+<!-- =============================================
+     SCREEN 3: QUESTIONS
+============================================= -->
+<section id="screen-questions" class="screen" role="main">
+
+  <!-- Header -->
+  <header class="questions-header">
+    <div class="team-tag">
+      <span class="dot"></span>
+      <span class="team-name" id="q-team-name">Team: —</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.3em;color:var(--text-dim);text-transform:uppercase;">
+        Your Verdict
+      </div>
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--accent-cyan);letter-spacing:0.15em;" id="q-total">
+        3 Questions
+      </div>
+    </div>
+
+    <div class="timer-bar">
+      <div>
+        <div class="timer-label">Time Remaining</div>
+        <div class="timer-display" id="timer-questions">15:00</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main questions body -->
+  <div class="questions-main">
+    <div class="question-prompt">// Name the killer. Name the motive. Name the method.</div>
+    <div class="question-count">Make Your Deductions</div>
+
+    <!-- Progress bar -->
+    <div class="question-progress">
+      <div class="question-progress-fill" id="question-progress-fill" style="width:0%"></div>
+    </div>
+
+    <!-- Questions rendered here -->
+    <div id="questions-container"></div>
+
+    <!-- Answer status chips -->
+    <div style="margin-top:32px;">
+      <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.25em;color:var(--text-dim);text-transform:uppercase;margin-bottom:12px;">
+        Answer Status
+      </div>
+      <div id="answers-summary" class="answers-summary"></div>
+    </div>
+  </div>
+
+  <!-- Lock-in / Submit bar -->
+  <div id="lockin-bar" class="lockin-bar">
+    <p id="lockin-status">Select your answers above, then lock in</p>
+
+    <button id="btn-back-case" class="btn-ghost">← Back to Case</button>
+
+    <button id="btn-lockin" class="btn-primary" style="width:auto;padding:12px 28px;">
+      🔒 LOCK IN ANSWERS
+    </button>
+
+    <button id="btn-change" class="btn-secondary hidden" style="padding:12px 20px;">
+      ✏ Change Answers
+    </button>
+
+    <button id="btn-submit" class="btn-primary hidden" style="width:auto;padding:12px 28px;background:var(--accent-green);color:#000;">
+      ✓ SUBMIT VERDICT
+    </button>
+  </div>
+
+</section>
+
+<!-- =============================================
+     SCREEN 4: SUBMITTED
+============================================= -->
+<section id="screen-submitted" class="screen" role="main">
+
+  <div class="submitted-icon">✅</div>
+
+  <h1 class="submitted-title">Verdict Submitted</h1>
+  <p class="submitted-subtitle" id="submitted-team">Team: —</p>
+
+  <div class="submitted-stats">
+    <div class="stat-item">
+      <div class="stat-value" id="submitted-time">—</div>
+      <div class="stat-label">Time Elapsed</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="submitted-correct" style="color:var(--accent-gold);">—</div>
+      <div class="stat-label">Answers Locked</div>
+    </div>
+  </div>
+
+  <!-- Answer review -->
+  <div class="submitted-answers">
+    <h3>// Your Answers</h3>
+    <div id="answer-review-list"></div>
+  </div>
+
+  <div class="submitted-note">
+    Your answers have been recorded.<br />
+    Results and the final reveal will be announced by the admin.<br />
+    <span style="color:var(--accent-red2);margin-top:8px;display:block;">
+      TRUTH RENDERS JUSTICE.
+    </span>
+    <br />
+    <span id="submitted-forced-note" style="color:var(--text-dim);font-size:10px;"></span>
+  </div>
+
+  <!-- Atmospheric footer -->
+  <div style="
+    position:absolute;
+    bottom:2rem;
+    left:0;right:0;
+    display:flex;
+    justify-content:space-around;
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:0.25em;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    padding:0 2rem;
+  ">
+    <span>🔍 Follow the evidence</span>
+    <span>👁 Who had the motive?</span>
+    <span>🏆 Solve the mystery</span>
+  </div>
+
+</section>
+
+<script src="js/app.js"></script>
+
+<!-- Fix: timer display sync across screens -->
+<script>
+  // Patch: single timer drives all .timer-display elements
+  // Both #timer-case and #timer-questions are updated by the interval in app.js
+</script>
+</body>
+</html>
