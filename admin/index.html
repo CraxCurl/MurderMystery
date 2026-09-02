@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIMurdle — Admin Panel</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+
+<div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+<div id="app">
+
+  <!-- ══ TOP BAR ══ -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <span class="logo-text">AIMurdle</span>
+      <span class="logo-badge">Admin</span>
+    </div>
+
+    <div class="topbar-center" id="topbar-clock">——:——:——</div>
+
+    <div class="topbar-right">
+      <div class="live-pill">
+        <div class="live-dot"></div>
+        Live
+      </div>
+      <button id="btn-export" class="btn-sm" title="Export leaderboard as CSV">⬇ Export CSV</button>
+      <button id="btn-logout" class="btn-logout">Log Out</button>
+    </div>
+  </header>
+
+  <!-- ══ MAIN GRID ══ -->
+  <main class="admin-main">
+
+    <!-- ── Stat Cards Row ── -->
+    <div class="stats-row">
+
+      <div class="stat-card" style="--card-accent:var(--accent-cyan);--card-glow:var(--glow-cyan)">
+        <div class="sc-label">Teams Submitted</div>
+        <div class="sc-value" id="stat-teams">0</div>
+        <div class="sc-sub">responses recorded</div>
+      </div>
+
+      <div class="stat-card" style="--card-accent:var(--accent-gold);--card-glow:var(--glow-gold)">
+        <div class="sc-label">Avg. Correct</div>
+        <div class="sc-value" id="stat-correct">—</div>
+        <div class="sc-sub">out of 3 questions</div>
+      </div>
+
+      <div class="stat-card" style="--card-accent:var(--accent-green);--card-glow:var(--glow-green)">
+        <div class="sc-label">Fastest Time</div>
+        <div class="sc-value" id="stat-fastest">—</div>
+        <div class="sc-sub">mm:ss elapsed</div>
+      </div>
+
+      <div class="stat-card" style="--card-accent:var(--accent-red2);--card-glow:var(--glow-red)">
+        <div class="sc-label">Active Timer</div>
+        <div class="sc-value" id="stat-timer">15m</div>
+        <div class="sc-sub">for new teams</div>
+      </div>
+
+    </div>
+
+    <!-- ── Leaderboard (left/main) ── -->
+    <div class="leaderboard-panel">
+      <div class="panel-header">
+        <div class="panel-title">🏆 Leaderboard</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button id="sort-score" class="btn-sm active">By Score</button>
+          <button id="sort-time"  class="btn-sm">By Time</button>
+        </div>
+      </div>
+
+      <div class="leaderboard-table-wrap">
+        <!-- Empty state -->
+        <div id="lb-empty" class="lb-empty">
+          <div class="lb-empty-icon">📭</div>
+          <p>No submissions yet.<br />Waiting for teams to lock in answers…</p>
+        </div>
+
+        <!-- Leaderboard table -->
+        <table class="lb-table" id="lb-table" aria-label="Leaderboard">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Team</th>
+              <th>Score</th>
+              <th>Time</th>
+              <th>Answers</th>
+              <th>Status</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+          <tbody id="lb-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Right Sidebar ── -->
+    <aside class="sidebar">
+
+      <!-- Timer Control Panel -->
+      <div class="control-panel">
+        <div class="cp-title">⏱ Timer Config</div>
+
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.7;">
+          Set how long teams have per round.<br />
+          Takes effect for the <em>next team</em> that starts.
+        </div>
+
+        <div class="timer-editor">
+          <input
+            type="number"
+            id="timer-input"
+            min="1" max="120" step="1"
+            value="15"
+            aria-label="Timer in minutes"
+          />
+          <span class="timer-unit">minutes</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-bottom:4px;">
+          <button id="btn-save-timer" class="btn-save">💾 Save Timer</button>
+          <button id="btn-reset-timer" class="btn-sm" style="padding:8px 12px;" title="Reset to 15 min">↺</button>
+        </div>
+
+        <div style="font-size:10px;color:var(--text-dim);margin-top:8px;font-family:var(--font-mono);letter-spacing:0.05em;">
+          Stored in localStorage[<span style="color:var(--accent-cyan)">'aimurdle_timer_minutes'</span>]
+        </div>
+      </div>
+
+      <!-- Data Control -->
+      <div class="control-panel">
+        <div class="cp-title">⚙ Data Control</div>
+        <button id="btn-clear-data" class="btn-danger">✕ Clear All Submissions</button>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:10px;line-height:1.6;font-family:var(--font-mono);">
+          Use before a new round.<br />
+          Removes all localStorage data.
+        </div>
+      </div>
+
+      <!-- Live Feed -->
+      <div class="feed-panel">
+        <div class="panel-header" style="flex-shrink:0;">
+          <div class="panel-title">📡 Live Feed</div>
+          <div class="live-pill" style="font-size:9px;">
+            <div class="live-dot" style="width:5px;height:5px;"></div>
+            Polling
+          </div>
+        </div>
+        <div id="feed-list" class="feed-list">
+          <div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:10px;color:var(--text-dim);">
+            Waiting for submissions…
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </main>
+</div>
+
+<script src="js/admin.js"></script>
+<script>
+  // Live clock in topbar
+  function updateClock() {
+    const now = new Date();
+    $('topbar-clock').textContent =
+      now.toLocaleTimeString('en-IN', { hour12: false });
+  }
+  function $(id) { return document.getElementById(id); }
+  updateClock();
+  setInterval(updateClock, 1000);
+</script>
+</body>
+</html>

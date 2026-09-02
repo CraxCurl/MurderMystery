@@ -103,7 +103,12 @@ function initLanding() {
     }
 
     App.caseData = caseData;
-    App.timerSeconds = (caseData.timer_minutes || 15) * 60;
+    // Admin can override the timer via localStorage (set from admin panel)
+    const adminOverride = parseInt(localStorage.getItem('aimurdle_timer_minutes'));
+    const timerMins = (!isNaN(adminOverride) && adminOverride > 0)
+      ? adminOverride
+      : (caseData.timer_minutes || 15);
+    App.timerSeconds = timerMins * 60;
     App.elapsed = 0;
 
     renderCase(caseData);
@@ -522,12 +527,25 @@ function submitAnswers(forced = false) {
     forced,
   };
 
-  // Store locally
+  // Store in shared submissions array (admin panel reads this)
   try {
+    const existing = JSON.parse(localStorage.getItem('aimurdle_submissions') || '[]');
+    // Remove any prior entry from same team (re-submission guard)
+    const updated = existing.filter(s => s.teamName !== payload.teamName);
+    updated.push(payload);
+    localStorage.setItem('aimurdle_submissions', JSON.stringify(updated));
+    // Also keep a team-specific key for direct lookup
     localStorage.setItem(`aimurdle_submission_${App.teamName}`, JSON.stringify(payload));
   } catch (_) {}
 
-  // Dispatch event for backend integration
+  // Notify admin panel in real-time via BroadcastChannel
+  try {
+    const ch = new BroadcastChannel('aimurdle_channel');
+    ch.postMessage({ type: 'submission', payload });
+    ch.close();
+  } catch (_) {}
+
+  // Dispatch window event for any other integrations
   window.dispatchEvent(new CustomEvent('aimurdle:submitted', { detail: payload }));
 
   renderSubmitted(payload, questions);
