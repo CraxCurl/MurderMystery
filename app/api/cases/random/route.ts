@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
 
+export const dynamic = "force-dynamic";
+
+
 // Simple string hash function for deterministic case allotment per team name
 function hashString(str: string): number {
   let hash = 0;

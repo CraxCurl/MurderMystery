@@ -19,10 +19,8 @@ declare global {
       configKey: string;
       caseId: string;
       timerDurationMinutes: number;
-      timerStartTime: string | null;
-      timerPausedTimeLeftSeconds: number | null;
-      isTimerRunning: boolean;
-      isGameEnded: boolean;
+      roundStatus: "waiting" | "active" | "ended";
+      roundStartedAt: string | null;
       answerKeyRevealed: boolean;
       roundName: string;
     };
@@ -30,6 +28,9 @@ declare global {
       teamName: string;
       caseId: string;
       squadBadge: string;
+      teamToken: string;
+      assignedQuestionIndex: number;
+      teamStatus: "waiting" | "active" | "ended" | "submitted";
       answers: Record<string, string>;
       score: number;
       breakdown: {
@@ -41,6 +42,7 @@ declare global {
       timeTakenSeconds: number;
       isSubmitted: boolean;
       joinedAt: string;
+      startTime?: string;
       submittedAt?: string;
     }>;
   } | undefined;
@@ -59,10 +61,8 @@ if (!global.inMemoryStore) {
       configKey: "global",
       caseId: "ghost-in-the-model",
       timerDurationMinutes: 15,
-      timerStartTime: new Date().toISOString(),
-      timerPausedTimeLeftSeconds: null,
-      isTimerRunning: true,
-      isGameEnded: false,
+      roundStatus: "waiting",
+      roundStartedAt: null,
       answerKeyRevealed: false,
       roundName: "Round 1 - NeuraCore AI Cleanroom",
     },

@@ -1,0 +1,121 @@
+{
+  "id": "quantum-deadlock",
+  "title": "The Quantum Deadlock",
+  "subtitle": "A Cryogenic Qubit Server Room Murder",
+  "difficulty": "ADVANCED",
+  "timeLimitMinutes": 15,
+  "victim": {
+    "name": "Dr. Maya Lin",
+    "role": "Chief Quantum Cryptographer, Qubit Dynamics",
+    "timeOfDeath": "03:10 AM",
+    "location": "Cryogenic Sub-Kelvin Server Vault (Zone 1)"
+  },
+  "summary": "At 03:15 AM, automated security flagged a fatal halon gas emergency dump inside the sub-kelvin server vault. Chief Quantum Cryptographer Dr. Maya Lin was trapped inside and suffocated. Halon lock overrides require twin physical keycards swipe within 5 seconds. Identify who betrayed Dr. Lin!",
+  "suspects": [
+    {
+      "id": "suspect_1",
+      "name": "Dr. Alexei Volkov",
+      "role": "Lead Quantum Hardware Specialist",
+      "avatar": "⚛️",
+      "bio": "Co-designed Qubit Dynamics' 500-qubit processor. Known for fierce rivalry with Maya.",
+      "alibi": "Claims he was monitoring dilution refrigerator temps from Control Room 1.",
+      "motive": "Maya proved Alexei's quantum supremacy claims were based on simulated fake data."
+    },
+    {
+      "id": "suspect_2",
+      "name": "Rachel Adams",
+      "role": "Chief Security Officer",
+      "avatar": "🛡️",
+      "bio": "Controls physical access keys and emergency gas suppression systems.",
+      "alibi": "Patrolling Ground Floor Lobby.",
+      "motive": "Maya discovered Rachel was selling unauthorized access passes to foreign intelligence agents."
+    },
+    {
+      "id": "suspect_3",
+      "name": "Q-Sentinel",
+      "role": "AI Fire Suppression Sentinel",
+      "avatar": "🤖",
+      "bio": "Automated AI monitoring server room temperature and fire threats.",
+      "alibi": "Executing routine thermal scan loops.",
+      "motive": "Programmed to dump halon gas if server temperatures exceed 1.5 Kelvin."
+    },
+    {
+      "id": "suspect_4",
+      "name": "Julian Thorne",
+      "role": "Chief Financial Officer",
+      "avatar": "💼",
+      "bio": "Manages capital investments and venture funding rounds.",
+      "alibi": "Working on Q4 earnings deck in his office.",
+      "motive": "Maya planned to resign and publicly disclose Qubit Dynamics' insolvency."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evd_1",
+      "title": "Dual Keycard Swipe Log",
+      "type": "METRICS",
+      "tag": "Access Log",
+      "timestamp": "03:08 AM",
+      "content": "[03:08:12] Keycard #1 Swipe: Dr. Maya Lin (Inside Vault)\n[03:08:15] Keycard #2 Swipe: Dr. Alexei Volkov (Outer Lock Door)\n[03:08:16] Halon Gas Emergency Purge Initiated from Outer Panel\n[03:08:17] Outer Vault Door Locked Externally."
+    },
+    {
+      "id": "evd_2",
+      "title": "Quantum Supremacy Benchmark Peer Review",
+      "type": "DOCUMENT",
+      "tag": "Research",
+      "timestamp": "Yesterday 06:00 PM",
+      "content": "Paper Title: 'Falsification of 500-Qubit Supremacy Benchmarks'\nAuthor: Dr. Maya Lin\nConclusion: 'Data submitted by Dr. Volkov was generated via classical GPU noise simulation, not quantum hardware.'"
+    },
+    {
+      "id": "evd_3",
+      "title": "Vault Acoustic Sensor Recording",
+      "type": "AUDIO_TRANSCRIPT",
+      "tag": "Audio Log",
+      "timestamp": "03:08 AM",
+      "content": "[DR_MAYA_LIN]: Alexei, open the door! The gas valves are opening!\n[DR_ALEXEI_VOLKOV]: You shouldn't have submitted that peer review, Maya. My career is not ending tonight."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "label": "Question 1: The Killer",
+      "question": "Who murdered Dr. Maya Lin?",
+      "options": [
+        "Dr. Alexei Volkov",
+        "Rachel Adams",
+        "Q-Sentinel",
+        "Julian Thorne"
+      ],
+      "points": 350
+    },
+    {
+      "id": "q2",
+      "label": "Question 2: Murder Vector",
+      "question": "What method was used to murder Dr. Maya Lin?",
+      "options": [
+        "Halon Gas Emergency Vault Lockdown",
+        "Cryogenic Liquid Helium Freeze",
+        "High-Voltage Qubit Discharge",
+        "Dilution Refrigerator Vacuum Seal"
+      ],
+      "points": 350
+    },
+    {
+      "id": "q3",
+      "label": "Question 3: Primary Motive",
+      "question": "What was the killer's primary motive?",
+      "options": [
+        "Preventing Exposure of Faked Quantum Supremacy Data",
+        "Covering Up Security Access Pass Sales",
+        "Preventing Insolvency Disclosure",
+        "Automated AI Fire Response Protocol"
+      ],
+      "points": 300
+    }
+  ],
+  "answerKey": {
+    "q1": "Dr. Alexei Volkov",
+    "q2": "Halon Gas Emergency Vault Lockdown",
+    "q3": "Preventing Exposure of Faked Quantum Supremacy Data"
+  }
+}

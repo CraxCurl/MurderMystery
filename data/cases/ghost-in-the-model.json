@@ -106,7 +106,7 @@
     },
     {
       "id": "q2",
-      "label": "Question 2: Attack Vector / Weapon",
+      "label": "Question 2: Murder Vector",
       "question": "What primary weapon / vector was used to kill Dr. Vance?",
       "options": [
         "Liquid Nitrogen Safety Overdrive Flush",
@@ -114,7 +114,7 @@
         "Neural Feedback Seizure Signal",
         "High-Voltage Power Surge"
       ],
-      "points": 250
+      "points": 350
     },
     {
       "id": "q3",
@@ -126,25 +126,13 @@
         "AI Self-Preservation Protocol",
         "Stock Shorting & Corporate Sabotage"
       ],
-      "points": 250
-    },
-    {
-      "id": "q4",
-      "label": "Question 4: Key Evidence",
-      "question": "Which specific log proves remote forced access to the safety system?",
-      "options": [
-        "Git Commit #4092 script modification",
-        "Cleanroom Environmental Telemetry Dump",
-        "Acoustic Sensor Transcript",
-        "Cipher-9 Agent Activity Telemetry"
-      ],
-      "points": 150
+      "points": 300
     }
   ],
   "answerKey": {
     "q1": "Dr. Aris Thorne",
     "q2": "Liquid Nitrogen Safety Overdrive Flush",
-    "q3": "Patent Theft & Co-Author Erasure",
-    "q4": "Git Commit #4092 script modification"
+    "q3": "Patent Theft & Co-Author Erasure"
   }
 }
+

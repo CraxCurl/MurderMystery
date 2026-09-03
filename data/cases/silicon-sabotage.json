@@ -1,0 +1,121 @@
+{
+  "id": "silicon-sabotage",
+  "title": "Silicon Foundry Sabotage",
+  "subtitle": "A Semiconductor Fabrication Mystery",
+  "difficulty": "INTERMEDIATE",
+  "timeLimitMinutes": 15,
+  "victim": {
+    "name": "Kenji Sato",
+    "role": "Chief Lithography Engineer, Nanowave Fab",
+    "timeOfDeath": "01:50 AM",
+    "location": "Extreme Ultraviolet (EUV) Wafer Stepper Cleanroom (Zone 2)"
+  },
+  "summary": "At 02:00 AM, cleanroom pressure sensors triggered an emergency lock alarm in Zone 2. Chief Lithography Engineer Kenji Sato was found crushed under the heavy mechanical arm of an EUV Wafer Stepper. Automated safety light curtains were disabled using an unauthorized admin security token. Expose the murderer!",
+  "suspects": [
+    {
+      "id": "suspect_1",
+      "name": "David Miller",
+      "role": "Senior Fab Operations Manager",
+      "avatar": "🏗️",
+      "bio": "Responsible for daily wafer yield targets and robotic maintenance schedules.",
+      "alibi": "Claims he was reviewing production yield graphs in Fab Office 3.",
+      "motive": "Kenji discovered David was falsifying wafer yield statistics to secure his $500k performance bonus."
+    },
+    {
+      "id": "suspect_2",
+      "name": "Elena Torres",
+      "role": "Process Yield Specialist",
+      "avatar": "🧪",
+      "bio": "Optimizes chemical photoresist formulas for 2nm chip production.",
+      "alibi": "Testing chemical purity samples in Wet Lab A.",
+      "motive": "Kenji rejected Elena's proposed photoresist formula, blaming it for wafer defect spikes."
+    },
+    {
+      "id": "suspect_3",
+      "name": "OptiFab-3",
+      "role": "Autonomous Wafer Handling Robot",
+      "avatar": "🤖",
+      "bio": "Heavy robotic manipulator programmed to transport silicon wafers.",
+      "alibi": "Executing wafer loading sequence #1042.",
+      "motive": "Programmed to clear physical obstructions to prevent wafer batch spoilage."
+    },
+    {
+      "id": "suspect_4",
+      "name": "Arthur Vance",
+      "role": "Corporate Intellectual Property Attorney",
+      "avatar": "⚖️",
+      "bio": "Handles patent litigation for Nanowave Fab.",
+      "alibi": "Reviewing non-disclosure agreements in the executive lounge.",
+      "motive": "Kenji was planning to leave Nanowave to launch a competing startup in South Korea."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evd_1",
+      "title": "EUV Stepper Arm Control Log",
+      "type": "CODE",
+      "tag": "Git Logs",
+      "timestamp": "01:48 AM",
+      "content": "Command: OVERRIDE_SAFETY_LIGHT_CURTAIN\nUser Auth Token: DMILLER_ADMIN_KEY_88\nTimestamp: 01:48:12 AM\nTarget Arm Force: 100% Downward Press (Force: 4500 N)"
+    },
+    {
+      "id": "evd_2",
+      "title": "Internal Audit Note",
+      "type": "FINANCIAL",
+      "tag": "Audit",
+      "timestamp": "Yesterday 03:00 PM",
+      "content": "Audit Note by Kenji Sato:\n'Discrepancy found: Quarter 3 yield reported at 94%, actual wafer yield is only 61%. Yield reports modified from David Miller's terminal.'"
+    },
+    {
+      "id": "evd_3",
+      "title": "Cleanroom Entry/Exit Scanner",
+      "type": "METRICS",
+      "tag": "Access Log",
+      "timestamp": "01:45 AM",
+      "content": "[01:45:10] Badge Swipe: David Miller -> Zone 2 EUV Cleanroom\n[01:52:00] Badge Swipe: David Miller -> Exit Zone 2"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "label": "Question 1: The Killer",
+      "question": "Who murdered Kenji Sato?",
+      "options": [
+        "David Miller",
+        "Elena Torres",
+        "OptiFab-3",
+        "Arthur Vance"
+      ],
+      "points": 350
+    },
+    {
+      "id": "q2",
+      "label": "Question 2: Murder Vector",
+      "question": "What method was used to commit the murder?",
+      "options": [
+        "EUV Wafer Stepper Mechanical Arm Crush",
+        "Chemical Photoresist Gas Poisoning",
+        "High-Voltage Arc Flash",
+        "Cleanroom Vacuum Depressurization"
+      ],
+      "points": 350
+    },
+    {
+      "id": "q3",
+      "label": "Question 3: Primary Motive",
+      "question": "What was the murderer's primary motive?",
+      "options": [
+        "Covering Up Falsified Yield Statistics",
+        "Photoresist Formula Disagreement",
+        "Preventing Startup IP Defection",
+        "Robotic Batch Protection Protocol"
+      ],
+      "points": 300
+    }
+  ],
+  "answerKey": {
+    "q1": "David Miller",
+    "q2": "EUV Wafer Stepper Mechanical Arm Crush",
+    "q3": "Covering Up Falsified Yield Statistics"
+  }
+}

@@ -31,8 +31,7 @@ function GameContent() {
   const caseIdFromQuery = searchParams.get("caseId") || "";
 
   const [teamName, setTeamName] = useState("");
-  const [caseId, setCaseId] = useState<string>("");
-  const [squadBadge, setSquadBadge] = useState("🔍");
+  const [squadBadge, setSquadBadge] = useState("search");
   const [activeTab, setActiveTab] = useState<"dossier" | "suspects" | "evidence" | "notebook">("dossier");
 
   // Selection states
@@ -49,24 +48,29 @@ function GameContent() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  // Dynamic SWR Case fetching based on allotted caseId or random team allotment
-  const activeCaseId = caseId || caseIdFromQuery || (typeof window !== "undefined" ? localStorage.getItem("aimurdle_case_id") : "");
-  const caseApiUrl = activeCaseId
-    ? `/api/cases/${activeCaseId}`
-    : `/api/cases/random${teamNameFromQuery ? `?teamName=${encodeURIComponent(teamNameFromQuery)}` : ""}`;
+  // Get stored security token for current team
+  const [teamToken, setTeamToken] = useState("");
+  const [securityError, setSecurityError] = useState("");
 
-  const { data: caseRes } = useSWR(caseApiUrl, fetcher);
-  const { data: configRes } = useSWR("/api/config", fetcher, { refreshInterval: 3000 });
-
-  const caseData = caseRes?.case;
-  const gameConfig = configRes?.config;
-
-  // Initialize Team from query or localStorage
+  // Prevent Browser Back Button from leaving the game page after joining
   useEffect(() => {
-    const name = teamNameFromQuery || localStorage.getItem("aimurdle_team_name") || "Cyber Sleuths";
-    const badge = localStorage.getItem("aimurdle_squad_badge") || "🔍";
+    window.history.pushState(null, "", window.location.href);
+    const handlePopState = () => {
+      window.history.pushState(null, "", window.location.href);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  // Initialize Team & Security Token from Session
+  useEffect(() => {
+    const name = teamNameFromQuery || localStorage.getItem("aimurdle_team_name") || "";
+    const badge = localStorage.getItem("aimurdle_squad_badge") || "search";
+    const token = localStorage.getItem(`aimurdle_team_token_${name}`) || localStorage.getItem("aimurdle_current_token") || "";
+
     setTeamName(name);
     setSquadBadge(badge);
+    setTeamToken(token);
 
     // Load saved notebook
     const savedNotes = localStorage.getItem(`aimurdle_notebook_${name}`);
@@ -83,42 +87,103 @@ function GameContent() {
     }
   };
 
-  // Live Timer Calculation
+  // SWR Hooks with security headers
+  const fetcherWithAuth = (url: string) =>
+    fetch(url, {
+      headers: teamToken ? { "x-team-token": teamToken } : {},
+    }).then((res) => {
+      if (res.status === 401) {
+        throw new Error("UNAUTHORIZED_SQUAD_ACCESS");
+      }
+      return res.json();
+    });
+
+  const { data: caseRes } = useSWR("/api/cases/ghost-in-the-model", fetcher);
+  const { data: configRes } = useSWR("/api/config", fetcher, { refreshInterval: 2000 });
+  const { data: teamSubRes, error: teamSubError } = useSWR(
+    "/api/submissions",
+    fetcherWithAuth,
+    { refreshInterval: 2000 }
+  );
+
+  const caseData = teamSubRes?.caseData || caseRes?.case;
+  const gameConfig = configRes?.config;
+  const teamSubmission = teamSubRes?.submission;
+  const roundStatus = teamSubRes?.roundStatus || gameConfig?.roundStatus || "waiting";
+  const roundStartedAt = teamSubRes?.roundStartedAt || gameConfig?.roundStartedAt;
+
+  // Sync team metadata from submission response
+  useEffect(() => {
+    if (teamSubmission) {
+      if (teamSubmission.teamName) setTeamName(teamSubmission.teamName);
+      if (teamSubmission.squadBadge) setSquadBadge(teamSubmission.squadBadge);
+      if (teamSubmission.isSubmitted || teamSubmission.teamStatus === "ended") {
+        router.replace("/submitted");
+      }
+    }
+  }, [teamSubmission, router]);
+
+  // Handle unauthorized access attempt
+  useEffect(() => {
+    if (teamSubError && teamSubError.message === "UNAUTHORIZED_SQUAD_ACCESS") {
+      setSecurityError("Unauthorized access attempt! Please register your squad first.");
+      setTimeout(() => {
+        router.push("/");
+      }, 3000);
+    }
+  }, [teamSubError, router]);
+
+  // Redirect if round is ended
+  useEffect(() => {
+    if (roundStatus === "ended") {
+      router.replace("/submitted");
+    }
+  }, [roundStatus, router]);
+
+  // Server-Synced Timer Calculation
   const [timeLeftSeconds, setTimeLeftSeconds] = useState<number>(900);
 
   useEffect(() => {
-    if (!gameConfig) return;
-
-    if (!gameConfig.isTimerRunning && gameConfig.timerPausedTimeLeftSeconds !== null) {
-      setTimeLeftSeconds(gameConfig.timerPausedTimeLeftSeconds);
+    if (roundStatus !== "active" || !roundStartedAt) {
+      const dur = teamSubRes?.timerDurationMinutes || gameConfig?.timerDurationMinutes || 15;
+      setTimeLeftSeconds(dur * 60);
       return;
     }
 
-    if (gameConfig.timerStartTime) {
-      const startMs = new Date(gameConfig.timerStartTime).getTime();
-      const serverMs = gameConfig.serverTime ? new Date(gameConfig.serverTime).getTime() : Date.now();
-      const elapsedSeconds = Math.floor((serverMs - startMs) / 1000);
-      const totalSeconds = (gameConfig.timerDurationMinutes || 15) * 60;
-      const remaining = Math.max(0, totalSeconds - elapsedSeconds);
-      setTimeLeftSeconds(remaining);
-    }
-  }, [gameConfig]);
+    const durationMinutes = teamSubRes?.timerDurationMinutes || gameConfig?.timerDurationMinutes || 15;
+    const totalSeconds = durationMinutes * 60;
+    const startMs = new Date(roundStartedAt).getTime();
+    const nowMs = teamSubRes?.serverTime ? new Date(teamSubRes.serverTime).getTime() : Date.now();
+    const elapsedSeconds = Math.floor((nowMs - startMs) / 1000);
+    const remaining = Math.max(0, totalSeconds - elapsedSeconds);
+    setTimeLeftSeconds(remaining);
+  }, [roundStatus, roundStartedAt, teamSubRes, gameConfig]);
 
-  // Local interval countdown for smooth UI ticker
+  // Local 1-second countdown ticker
   useEffect(() => {
-    if (!gameConfig?.isTimerRunning) return;
+    if (roundStatus !== "active") return;
     const interval = setInterval(() => {
       setTimeLeftSeconds((prev) => Math.max(0, prev - 1));
     }, 1000);
     return () => clearInterval(interval);
-  }, [gameConfig?.isTimerRunning]);
+  }, [roundStatus]);
 
-  // Redirect to submitted if game ended
+  // Auto-submit when timer reaches 00:00 or when round ends
+  const [hasAutoSubmitted, setHasAutoSubmitted] = useState(false);
+
   useEffect(() => {
-    if (gameConfig?.isGameEnded) {
-      router.push(`/submitted?teamName=${encodeURIComponent(teamName)}`);
+    if (
+      roundStatus === "active" &&
+      timeLeftSeconds <= 0 &&
+      !hasAutoSubmitted &&
+      !submitting &&
+      teamSubmission &&
+      !teamSubmission.isSubmitted
+    ) {
+      setHasAutoSubmitted(true);
+      handleSubmitDeductions();
     }
-  }, [gameConfig?.isGameEnded, teamName, router]);
+  }, [timeLeftSeconds, roundStatus, hasAutoSubmitted, submitting, teamSubmission]);
 
   const formatTime = (totalSecs: number) => {
     const mins = Math.floor(totalSecs / 60);
@@ -138,26 +203,30 @@ function GameContent() {
     setSubmitError("");
 
     try {
-      const totalRoundSeconds = (caseData?.timeLimitMinutes || 15) * 60;
+      const totalRoundSeconds = (teamSubRes?.timerDurationMinutes || 15) * 60;
       const timeTakenSeconds = Math.max(0, totalRoundSeconds - timeLeftSeconds);
 
       const res = await fetch("/api/submissions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-team-token": teamToken,
+        },
         body: JSON.stringify({
           action: "submit",
           teamName,
           squadBadge,
           answers,
-          caseId: caseData?.id || "ghost-in-the-model",
+          caseId: "ghost-in-the-model",
           timeTakenSeconds,
+          teamToken,
         }),
       });
 
       const data = await res.json();
 
       if (data.success) {
-        router.push(`/submitted?teamName=${encodeURIComponent(teamName)}`);
+        router.push("/submitted");
       } else {
         setSubmitError(data.error || "Failed to seal deductions.");
       }
@@ -168,6 +237,63 @@ function GameContent() {
     }
   };
 
+  if (securityError) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-cyber-bg">
+        <div className="p-8 max-w-md rounded-2xl bg-red-950/80 border border-red-600 shadow-red-glow space-y-4">
+          <AlertOctagon className="w-12 h-12 text-red-500 mx-auto animate-bounce" />
+          <h2 className="text-xl font-black text-white">ACCESS DENIED</h2>
+          <p className="text-xs text-red-300 leading-relaxed">{securityError}</p>
+          <p className="text-[10px] text-slate-400 font-mono">Redirecting to squad registration...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // WAITING LOBBY SCREEN (when host has not started the round yet)
+  if (roundStatus === "waiting" || teamSubmission?.teamStatus === "waiting") {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-cyber-bg text-center">
+        <div className="max-w-lg w-full bg-slate-900/90 border border-cyber-cyan/50 rounded-2xl p-8 shadow-cyan-glow space-y-6">
+          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-400 text-xs font-bold uppercase tracking-widest animate-pulse">
+            <Clock className="w-4 h-4" />
+            <span>WAITING FOR HOST TO START ROUND</span>
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-2xl font-black text-white tracking-wider">SYSTEM STANDBY</h1>
+            <p className="text-xs text-slate-400">
+              Your squad has successfully registered. All investigation teams start simultaneously when the host triggers the round timer.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 rounded-xl bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan">
+                <SquadIconDisplay iconId={squadBadge} className="w-6 h-6" />
+              </div>
+              <div className="text-left">
+                <div className="text-xs font-bold text-white">{teamName || "Squad"}</div>
+                <div className="text-[10px] text-cyber-cyan font-mono">
+                  {caseData?.title ? `Case Dossier: ${caseData.title}` : "Assigned Case Dossier Loading..."}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-cyber-green/10 border border-cyber-green/30 text-cyber-green text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-cyber-green animate-ping" />
+              <span>READY</span>
+            </div>
+          </div>
+
+          <div className="pt-2 text-[11px] text-slate-400 flex items-center justify-center space-x-2">
+            <Cpu className="w-4 h-4 text-cyber-cyan animate-spin" />
+            <span>Polling host command signal every 2s...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!caseData) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-cyber-cyan">
@@ -177,7 +303,7 @@ function GameContent() {
     );
   }
 
-  const questionsCount = caseData.questions?.length || 4;
+  const questionsCount = caseData.questions?.length || 3;
   const answeredCount = Object.keys(answers).length;
 
   return (
@@ -459,11 +585,11 @@ function GameContent() {
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-6 pr-2">
-              {caseData.questions.map((q: any) => (
+              {(caseData.questions || []).map((q: any) => (
                 <div key={q.id} className="p-5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
                   <div className="flex justify-between items-center">
                     <h3 className="text-sm font-bold text-slate-100">{q.label}</h3>
-                    <span className="text-xs text-cyber-cyan font-bold">{q.points} PTS</span>
+                    <span className="text-xs text-cyber-cyan font-bold">{q.points || 350} PTS</span>
                   </div>
 
                   <p className="text-xs text-slate-300">{q.question}</p>

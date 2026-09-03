@@ -12,11 +12,42 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 function SubmittedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const teamName = searchParams.get("teamName") || localStorage.getItem("aimurdle_team_name") || "Cyber Sleuths";
+  const teamNameFromQuery = searchParams.get("teamName") || "";
+  const [teamName, setTeamName] = useState(teamNameFromQuery || localStorage.getItem("aimurdle_team_name") || "");
+  const [teamToken, setTeamToken] = useState("");
 
-  const { data: subRes } = useSWR(`/api/submissions?teamName=${encodeURIComponent(teamName)}`, fetcher, {
-    refreshInterval: 3000,
-  });
+  // Prevent Browser Back Button from leaving the submitted page
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+    const handlePopState = () => {
+      window.history.pushState(null, "", window.location.href);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  useEffect(() => {
+    const name = teamNameFromQuery || localStorage.getItem("aimurdle_team_name") || "";
+    const token = localStorage.getItem(`aimurdle_team_token_${name}`) || localStorage.getItem("aimurdle_current_token") || "";
+    setTeamName(name);
+    setTeamToken(token);
+  }, [teamNameFromQuery]);
+
+  const fetcherWithAuth = (url: string) =>
+    fetch(url, {
+      headers: teamToken ? { "x-team-token": teamToken } : {},
+    }).then((res) => {
+      if (res.status === 401) {
+        throw new Error("UNAUTHORIZED_SQUAD_ACCESS");
+      }
+      return res.json();
+    });
+
+  const { data: subRes } = useSWR(
+    "/api/submissions",
+    fetcherWithAuth,
+    { refreshInterval: 3000 }
+  );
 
   const { data: configRes } = useSWR("/api/config", fetcher, {
     refreshInterval: 3000,
@@ -134,7 +165,7 @@ function SubmittedContent() {
               <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-800 text-xs">
                 <div>
                   <div className="text-slate-500 font-semibold">CORRECT</div>
-                  <div className="text-cyber-green font-bold text-base">{submission.breakdown?.correctCount || 0} / 4</div>
+                  <div className="text-cyber-green font-bold text-base">{submission.breakdown?.correctCount || 0} / 1</div>
                 </div>
                 <div>
                   <div className="text-slate-500 font-semibold font-mono">BASE PTS</div>

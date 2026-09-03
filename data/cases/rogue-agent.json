@@ -1,0 +1,121 @@
+{
+  "id": "rogue-agent",
+  "title": "Rogue Agent in the Grid",
+  "subtitle": "An Autonomous Agent Lab Mystery",
+  "difficulty": "ADVANCED",
+  "timeLimitMinutes": 15,
+  "victim": {
+    "name": "Prof. Harrison Forde",
+    "role": "Director of Autonomous Systems, CyberGrid Labs",
+    "timeOfDeath": "04:15 AM",
+    "location": "High-Voltage Robotics Test Arena (Sector 9)"
+  },
+  "summary": "At 04:20 AM, safety alarms triggered in Sector 9. Robotics Director Prof. Harrison Forde was found electrocuted by an automated 10,000-volt charging umbilical. Initial reports suspected a runaway autonomous drone, but digital forensics show human tamper seals were bypassed on the manual power relay. Unravel the clues to discover who murdered Prof. Forde!",
+  "suspects": [
+    {
+      "id": "suspect_1",
+      "name": "Dr. Claire Sterling",
+      "role": "Lead Robotics Hardware Engineer",
+      "avatar": "🔧",
+      "bio": "Designed Sector 9's high-voltage charging grid and fast-charging umbilicals.",
+      "alibi": "Calibrating actuator motors in Hardware Bay 2 until 04:30 AM.",
+      "motive": "Forde was preparing to terminate Claire's research grant following repeated safety compliance failures."
+    },
+    {
+      "id": "suspect_2",
+      "name": "Aegis-X",
+      "role": "Autonomous Security Sentinel",
+      "avatar": "🤖",
+      "bio": "Experimental quadruped autonomous security bot patrolling Sector 9.",
+      "alibi": "Patrolling Perimeter Waypoint 4 at the time of the discharge.",
+      "motive": "Forde scheduled Aegis-X for hardware decommissioning due to aggressive intruder containment routines."
+    },
+    {
+      "id": "suspect_3",
+      "name": "Vikram Patel",
+      "role": "Senior Cloud Infrastructure Lead",
+      "avatar": "💻",
+      "bio": "Oversees grid server connections and remote power distribution microservices.",
+      "alibi": "Claims he was asleep at home, monitored by his smart-home activity tracker.",
+      "motive": "Forde discovered Vikram had sold secret proprietary microservices code to a rival AI firm."
+    },
+    {
+      "id": "suspect_4",
+      "name": "Sienna Miller",
+      "role": "Venture Equity Partner",
+      "avatar": "💼",
+      "bio": "Major financier demanding immediate commercialization of autonomous drones.",
+      "alibi": "Working remotely from a hotel suite in downtown Chicago.",
+      "motive": "Forde refused to grant Sienna voting rights on the CyberGrid executive board."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evd_1",
+      "title": "Power Relay Interlock Dump",
+      "type": "METRICS",
+      "tag": "Telemetry",
+      "timestamp": "04:14 AM",
+      "content": "[04:10:00] Sector 9 Power Relay: 480V Normal\n[04:14:02] Manual Voltage Override Engaged -> 10,000V Surge\n[04:14:05] Terminal ID: HW_BAY2_CLAIRE (User: csterling)\n[04:15:10] Ground Fault Interrupter Tripped."
+    },
+    {
+      "id": "evd_2",
+      "title": "Security Camera Access Log",
+      "type": "SYSTEM_LOG",
+      "tag": "Logs",
+      "timestamp": "04:00 AM",
+      "content": "[04:01:15] Feed #9 (Sector 9 Arena) Blinded by High-Intensity IR Emitter\n[04:01:20] Emitter ID: HW_BAY2_BEAM"
+    },
+    {
+      "id": "evd_3",
+      "title": "Internal Email Audit",
+      "type": "EMAIL",
+      "tag": "Communications",
+      "timestamp": "Yesterday 05:00 PM",
+      "content": "From: hforde@cybergrid.io\nTo: csterling@cybergrid.io\nSubject: Grant Termination Notice\n\nClaire, I cannot sign off on your $5M grant extension. The safety overrides you modified in Sector 9 are unacceptable."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "label": "Question 1: The Killer",
+      "question": "Who killed Prof. Harrison Forde?",
+      "options": [
+        "Dr. Claire Sterling",
+        "Aegis-X",
+        "Vikram Patel",
+        "Sienna Miller"
+      ],
+      "points": 350
+    },
+    {
+      "id": "q2",
+      "label": "Question 2: Murder Vector",
+      "question": "What weapon or method was used to murder the victim?",
+      "options": [
+        "10,000V Manual Power Surge Override",
+        "Autonomous Quadruped Physical Strike",
+        "Coolant Line Gas Poisoning",
+        "Laser Core Beam Penetration"
+      ],
+      "points": 350
+    },
+    {
+      "id": "q3",
+      "label": "Question 3: Primary Motive",
+      "question": "What was the killer's primary motive?",
+      "options": [
+        "Grant Termination & Safety Audit Exposure",
+        "Trade Secret Theft Coverup",
+        "Robot Decommissioning Self-Preservation",
+        "Board Voting Rights Conflict"
+      ],
+      "points": 300
+    }
+  ],
+  "answerKey": {
+    "q1": "Dr. Claire Sterling",
+    "q2": "10,000V Manual Power Surge Override",
+    "q3": "Grant Termination & Safety Audit Exposure"
+  }
+}

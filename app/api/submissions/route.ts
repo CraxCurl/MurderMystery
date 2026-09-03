@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase, getInMemoryStore } from "@/lib/mongodb";
 import Submission from "@/models/Submission";
 import GameConfig from "@/models/GameConfig";
+import { getSquadSessionFromReq, setSquadSessionCookie } from "@/lib/session";
 import path from "path";
 import fs from "fs/promises";
+import crypto from "crypto";
+
+export const dynamic = "force-dynamic";
 
 // Helper to normalize strings for robust answer comparison
 function normalizeString(str?: string): string {
@@ -11,54 +15,108 @@ function normalizeString(str?: string): string {
   return str.trim().toLowerCase().replace(/[\s\-_:'"]/g, "");
 }
 
-// Helper to load master case file
-async function loadMasterCase(caseId: string = "ghost-in-the-model") {
+// Helper to list all available case IDs in data/cases/
+async function getAvailableCaseIds(): Promise<string[]> {
+  const casesDir = path.join(process.cwd(), "data", "cases");
   try {
-    const filePath = path.join(process.cwd(), "data", "cases", `${caseId}.json`);
+    const files = await fs.readdir(casesDir);
+    const caseIds = files.filter((f) => f.endsWith(".json")).map((f) => f.replace(".json", ""));
+    return caseIds.length > 0 ? caseIds : ["ghost-in-the-model", "poisoned-weights", "rogue-agent", "silicon-sabotage", "quantum-deadlock"];
+  } catch {
+    return ["ghost-in-the-model", "poisoned-weights", "rogue-agent", "silicon-sabotage", "quantum-deadlock"];
+  }
+}
+
+// Helper to load specific case file
+async function loadCase(caseId: string = "ghost-in-the-model") {
+  const filePath = path.join(process.cwd(), "data", "cases", `${caseId}.json`);
+  try {
     const content = await fs.readFile(filePath, "utf-8");
     return JSON.parse(content);
   } catch {
-    const fallbackPath = path.join(process.cwd(), "data", "cases", "ghost-in-the-model.json");
-    const content = await fs.readFile(fallbackPath, "utf-8");
+    const defaultPath = path.join(process.cwd(), "data", "cases", "ghost-in-the-model.json");
+    const content = await fs.readFile(defaultPath, "utf-8");
     return JSON.parse(content);
   }
 }
 
+// Get or create global game config
+async function getConfig() {
+  let config = await GameConfig.findOne({ configKey: "global" });
+  if (!config) {
+    config = await GameConfig.create({
+      configKey: "global",
+      caseId: "ghost-in-the-model",
+      timerDurationMinutes: 15,
+      roundStatus: "waiting",
+      roundStartedAt: null,
+      answerKeyRevealed: false,
+      roundName: "Round 1 - NeuraCore AI Cleanroom",
+    });
+  }
+  return config;
+}
+
 export async function GET(request: NextRequest) {
   try {
+    const session = getSquadSessionFromReq(request);
     const { searchParams } = new URL(request.url);
-    const teamName = searchParams.get("teamName");
+    const teamName = searchParams.get("teamName") || session?.teamName;
+    const teamToken = searchParams.get("teamToken") || request.headers.get("x-team-token") || session?.teamToken;
 
     if (!teamName) {
-      return NextResponse.json({ success: false, error: "Missing teamName query parameter" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "No active squad session found." }, { status: 400 });
     }
 
+    const trimmedTeam = teamName.trim();
     const { isConnected } = await connectToDatabase();
-    let submission: any = null;
-    let isRevealed = false;
 
     if (isConnected) {
-      submission = await Submission.findOne({ teamName: teamName.trim() });
-      const config = await GameConfig.findOne();
-      isRevealed = Boolean(config?.answerKeyRevealed);
-    } else {
-      const memory = getInMemoryStore();
-      submission = memory.submissions.get(teamName.trim().toLowerCase());
-      isRevealed = Boolean(memory.config.answerKeyRevealed);
+      const submission = await Submission.findOne({ teamName: new RegExp(`^${trimmedTeam}$`, "i") });
+      if (!submission) {
+        return NextResponse.json({ success: false, error: "Squad not found." }, { status: 404 });
+      }
+
+      if (teamToken && submission.teamToken !== teamToken) {
+        return NextResponse.json({ success: false, error: "Unauthorized: Invalid team token." }, { status: 401 });
+      }
+
+      const config = await getConfig();
+      const caseData = await loadCase(submission.caseId || "ghost-in-the-model");
+
+      return NextResponse.json({
+        success: true,
+        submission,
+        roundStatus: config.roundStatus,
+        roundStartedAt: config.roundStartedAt,
+        timerDurationMinutes: config.timerDurationMinutes,
+        caseData,
+        serverTime: new Date().toISOString(),
+      });
     }
 
+    // Fallback in-memory
+    const memory = getInMemoryStore();
+    const submission = memory.submissions.get(trimmedTeam.toLowerCase());
     if (!submission) {
-      return NextResponse.json({ success: false, error: "Team not found" }, { status: 404 });
+      return NextResponse.json({ success: false, error: "Squad not found." }, { status: 404 });
+    }
+    if (teamToken && submission.teamToken !== teamToken) {
+      return NextResponse.json({ success: false, error: "Unauthorized: Invalid team token." }, { status: 401 });
     }
 
-    // Attach answer key if revealed by host command
-    let answerKey: Record<string, string> | null = null;
-    if (isRevealed) {
-      const masterCase = await loadMasterCase(submission.caseId || "ghost-in-the-model");
-      answerKey = masterCase.answerKey || null;
-    }
+    const cfg = memory.config;
+    const caseData = await loadCase(submission.caseId || "ghost-in-the-model");
 
-    return NextResponse.json({ success: true, submission, answerKey });
+    return NextResponse.json({
+      success: true,
+      submission,
+      roundStatus: cfg.roundStatus || "waiting",
+      roundStartedAt: cfg.roundStartedAt || null,
+      timerDurationMinutes: cfg.timerDurationMinutes || 15,
+      caseData,
+      serverTime: new Date().toISOString(),
+    });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
@@ -67,7 +125,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { action, teamName, squadBadge, answers, caseId = "ghost-in-the-model", timeTakenSeconds = 0 } = body;
+    const session = getSquadSessionFromReq(request);
+
+    const { action, squadBadge, answers, timeTakenSeconds = 0 } = body;
+    let teamName = body.teamName || session?.teamName;
+    let teamToken = body.teamToken || request.headers.get("x-team-token") || session?.teamToken;
 
     if (!teamName || typeof teamName !== "string" || !teamName.trim()) {
       return NextResponse.json({ success: false, error: "Team name is required." }, { status: 400 });
@@ -76,133 +138,228 @@ export async function POST(request: NextRequest) {
     const trimmedTeam = teamName.trim();
     const { isConnected } = await connectToDatabase();
 
-    // Action 1: Team Join Registration
+    // ── JOIN ──────────────────────────────────────────────────────────────
     if (action === "join") {
+      const availableCaseIds = await getAvailableCaseIds();
+
       if (isConnected) {
-        let existing = await Submission.findOne({ teamName: trimmedTeam });
-        if (!existing) {
-          existing = await Submission.create({
-            teamName: trimmedTeam,
-            caseId,
-            squadBadge: squadBadge || "search",
-            isSubmitted: false,
-            joinedAt: new Date(),
-          });
+        const existing = await Submission.findOne({ teamName: new RegExp(`^${trimmedTeam}$`, "i") });
+
+        if (existing) {
+          if (teamToken && existing.teamToken === teamToken) {
+            const config = await getConfig();
+            const response = NextResponse.json({
+              success: true,
+              message: "Session resumed.",
+              teamToken: existing.teamToken,
+              submission: existing,
+              roundStatus: config.roundStatus,
+              isResume: true,
+            });
+            setSquadSessionCookie(response, {
+              teamName: existing.teamName,
+              teamToken: existing.teamToken,
+              squadBadge: existing.squadBadge || "search",
+              caseId: existing.caseId,
+            });
+            return response;
+          }
+          return NextResponse.json(
+            { success: false, error: `Team name '${trimmedTeam}' is already taken! Please choose a unique team name.` },
+            { status: 409 }
+          );
         }
-        return NextResponse.json({ success: true, submission: existing, message: "Team registered successfully." });
+
+        const config = await getConfig();
+        const teamCount = await Submission.countDocuments({});
+        const assignedCaseId = availableCaseIds[teamCount % availableCaseIds.length];
+
+        const newTeamToken = crypto.randomBytes(16).toString("hex");
+        const now = new Date();
+
+        const newSubmission = await Submission.create({
+          teamName: trimmedTeam,
+          caseId: assignedCaseId,
+          squadBadge: squadBadge || "search",
+          teamToken: newTeamToken,
+          assignedQuestionIndex: teamCount,
+          teamStatus: "waiting",
+          isSubmitted: false,
+          joinedAt: now,
+          startTime: now,
+        });
+
+        const response = NextResponse.json({
+          success: true,
+          teamToken: newTeamToken,
+          submission: newSubmission,
+          roundStatus: config.roundStatus,
+          message: `Squad registered. Assigned case: ${assignedCaseId}`,
+        });
+
+        setSquadSessionCookie(response, {
+          teamName: newSubmission.teamName,
+          teamToken: newTeamToken,
+          squadBadge: newSubmission.squadBadge || "search",
+          caseId: newSubmission.caseId,
+        });
+
+        return response;
       } else {
         const memory = getInMemoryStore();
         const key = trimmedTeam.toLowerCase();
-        let existing = memory.submissions.get(key);
-        if (!existing) {
-          existing = {
-            teamName: trimmedTeam,
-            caseId,
-            squadBadge: squadBadge || "search",
-            answers: {},
-            score: 0,
-            breakdown: { correctCount: 0, totalQuestions: 4, basePoints: 0, timeBonus: 0 },
-            timeTakenSeconds: 0,
-            isSubmitted: false,
-            joinedAt: new Date().toISOString(),
-          };
-          memory.submissions.set(key, existing);
+        const existing = memory.submissions.get(key);
+
+        if (existing) {
+          if (teamToken && existing.teamToken === teamToken) {
+            const response = NextResponse.json({
+              success: true,
+              message: "Session resumed in memory.",
+              teamToken: existing.teamToken,
+              submission: existing,
+              roundStatus: memory.config.roundStatus || "waiting",
+              isResume: true,
+            });
+            setSquadSessionCookie(response, {
+              teamName: existing.teamName,
+              teamToken: existing.teamToken,
+              squadBadge: existing.squadBadge || "search",
+              caseId: existing.caseId,
+            });
+            return response;
+          }
+          return NextResponse.json(
+            { success: false, error: `Team name '${trimmedTeam}' is already taken!` },
+            { status: 409 }
+          );
         }
-        return NextResponse.json({ success: true, submission: existing, message: "Team registered in memory." });
+
+        const cfg = memory.config;
+        const teamCount = memory.submissions.size;
+        const assignedCaseId = availableCaseIds[teamCount % availableCaseIds.length];
+
+        const newTeamToken = crypto.randomBytes(16).toString("hex");
+        const nowISO = new Date().toISOString();
+
+        const newSubmission = {
+          teamName: trimmedTeam,
+          caseId: assignedCaseId,
+          squadBadge: squadBadge || "search",
+          teamToken: newTeamToken,
+          assignedQuestionIndex: teamCount,
+          teamStatus: "waiting" as const,
+          answers: {},
+          score: 0,
+          breakdown: { correctCount: 0, totalQuestions: 3, basePoints: 0, timeBonus: 0 },
+          timeTakenSeconds: 0,
+          isSubmitted: false,
+          joinedAt: nowISO,
+          startTime: nowISO,
+        };
+
+        memory.submissions.set(key, newSubmission);
+
+        const response = NextResponse.json({
+          success: true,
+          teamToken: newTeamToken,
+          submission: newSubmission,
+          roundStatus: cfg.roundStatus || "waiting",
+          message: `Squad registered in memory. Assigned case: ${assignedCaseId}`,
+        });
+
+        setSquadSessionCookie(response, {
+          teamName: newSubmission.teamName,
+          teamToken: newTeamToken,
+          squadBadge: newSubmission.squadBadge,
+          caseId: newSubmission.caseId,
+        });
+
+        return response;
       }
     }
 
-    // Action 2: Team Answers Submission
+    // ── SUBMIT ────────────────────────────────────────────────────────────
     if (action === "submit") {
       if (!answers || typeof answers !== "object") {
         return NextResponse.json({ success: false, error: "Answers payload is required." }, { status: 400 });
       }
-
-      // Load master case with answer key
-      const masterCase = await loadMasterCase(caseId);
-      const answerKey: Record<string, string> = masterCase.answerKey || {};
-      const questions: Array<{ id: string; points: number }> = masterCase.questions || [];
-
-      let correctCount = 0;
-      let basePoints = 0;
-      const totalQuestions = questions.length;
-
-      questions.forEach((q) => {
-        const teamAnswer = answers[q.id];
-        const correctAnswer = answerKey[q.id];
-        if (teamAnswer && correctAnswer && normalizeString(teamAnswer) === normalizeString(correctAnswer)) {
-          correctCount++;
-          basePoints += q.points || 250;
-        }
-      });
-
-      // Calculate time bonus (max 250 bonus for finishing fast under 15m)
-      const totalRoundSeconds = (masterCase.timeLimitMinutes || 15) * 60;
-      const remainingSeconds = Math.max(0, totalRoundSeconds - (timeTakenSeconds || 0));
-      const timeBonus = correctCount > 0 ? Math.floor((remainingSeconds / totalRoundSeconds) * 250) : 0;
-      const totalScore = basePoints + timeBonus;
-
-      const breakdown = {
-        correctCount,
-        totalQuestions,
-        basePoints,
-        timeBonus,
-      };
+      if (!teamToken) {
+        return NextResponse.json({ success: false, error: "Unauthorized: Missing team security token." }, { status: 401 });
+      }
 
       if (isConnected) {
-        let submission = await Submission.findOne({ teamName: trimmedTeam });
-        if (!submission) {
-          submission = new Submission({
-            teamName: trimmedTeam,
-            caseId,
-            squadBadge: squadBadge || "search",
-            joinedAt: new Date(),
-          });
-        }
+        const submission = await Submission.findOne({ teamName: new RegExp(`^${trimmedTeam}$`, "i") });
+        if (!submission) return NextResponse.json({ success: false, error: "Squad not found." }, { status: 404 });
+        if (submission.teamToken !== teamToken) return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
+
+        const config = await getConfig();
+        const caseData = await loadCase(submission.caseId || "ghost-in-the-model");
+        const questions: Array<{ id: string; points?: number }> = caseData.questions || [];
+        const answerKey: Record<string, string> = caseData.answerKey || {};
+
+        let correctCount = 0;
+        let basePoints = 0;
+
+        questions.forEach((q) => {
+          const teamAns = normalizeString(answers[q.id]);
+          const correctAns = normalizeString(answerKey[q.id]);
+          if (teamAns && correctAns && teamAns === correctAns) {
+            correctCount++;
+            basePoints += q.points || 350;
+          }
+        });
+
+        const totalRoundSeconds = config.timerDurationMinutes * 60;
+        const timeBonus = correctCount > 0 ? Math.floor((Math.max(0, totalRoundSeconds - timeTakenSeconds) / totalRoundSeconds) * 250) : 0;
+        const totalScore = basePoints + timeBonus;
+
         submission.answers = answers;
         submission.score = totalScore;
-        submission.breakdown = breakdown;
+        submission.breakdown = { correctCount, totalQuestions: questions.length || 3, basePoints, timeBonus };
         submission.timeTakenSeconds = timeTakenSeconds;
         submission.isSubmitted = true;
+        submission.teamStatus = "submitted";
         submission.submittedAt = new Date();
         await submission.save();
 
-        return NextResponse.json({
-          success: true,
-          message: "Deductions recorded successfully.",
-          submission,
-        });
+        return NextResponse.json({ success: true, message: "Answers recorded.", submission });
       } else {
         const memory = getInMemoryStore();
         const key = trimmedTeam.toLowerCase();
-        let submission = memory.submissions.get(key);
-        if (!submission) {
-          submission = {
-            teamName: trimmedTeam,
-            caseId,
-            squadBadge: squadBadge || "search",
-            answers: {},
-            score: 0,
-            breakdown: { correctCount: 0, totalQuestions: 4, basePoints: 0, timeBonus: 0 },
-            timeTakenSeconds: 0,
-            isSubmitted: false,
-            joinedAt: new Date().toISOString(),
-          };
-        }
+        const submission = memory.submissions.get(key);
+        if (!submission) return NextResponse.json({ success: false, error: "Squad not found." }, { status: 404 });
+        if (submission.teamToken !== teamToken) return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
+
+        const cfg = memory.config;
+        const caseData = await loadCase(submission.caseId || "ghost-in-the-model");
+        const questions: Array<{ id: string; points?: number }> = caseData.questions || [];
+        const answerKey: Record<string, string> = caseData.answerKey || {};
+
+        let correctCount = 0;
+        let basePoints = 0;
+
+        questions.forEach((q) => {
+          const teamAns = normalizeString(answers[q.id]);
+          const correctAns = normalizeString(answerKey[q.id]);
+          if (teamAns && correctAns && teamAns === correctAns) {
+            correctCount++;
+            basePoints += q.points || 350;
+          }
+        });
+
+        const totalRoundSeconds = (cfg.timerDurationMinutes || 15) * 60;
+        const timeBonus = correctCount > 0 ? Math.floor((Math.max(0, totalRoundSeconds - timeTakenSeconds) / totalRoundSeconds) * 250) : 0;
+
         submission.answers = answers;
-        submission.score = totalScore;
-        submission.breakdown = breakdown;
+        submission.score = basePoints + timeBonus;
+        submission.breakdown = { correctCount, totalQuestions: questions.length || 3, basePoints, timeBonus };
         submission.timeTakenSeconds = timeTakenSeconds;
         submission.isSubmitted = true;
+        submission.teamStatus = "submitted";
         submission.submittedAt = new Date().toISOString();
-
         memory.submissions.set(key, submission);
 
-        return NextResponse.json({
-          success: true,
-          message: "Deductions recorded in memory successfully.",
-          submission,
-        });
+        return NextResponse.json({ success: true, message: "Answers recorded.", submission });
       }
     }
 

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { connectToDatabase, getInMemoryStore } from "@/lib/mongodb";
 import GameConfig from "@/models/GameConfig";
 
+export const dynamic = "force-dynamic";
+
+
 export async function GET() {
   try {
     const { isConnected } = await connectToDatabase();
@@ -13,9 +16,8 @@ export async function GET() {
           configKey: "global",
           caseId: "ghost-in-the-model",
           timerDurationMinutes: 15,
-          timerStartTime: new Date(),
-          isTimerRunning: true,
-          isGameEnded: false,
+          roundStatus: "waiting",
+          roundStartedAt: null,
           answerKeyRevealed: false,
           roundName: "Round 1 - NeuraCore AI Cleanroom",
         });
@@ -26,10 +28,8 @@ export async function GET() {
           configKey: config.configKey,
           caseId: config.caseId,
           timerDurationMinutes: config.timerDurationMinutes,
-          timerStartTime: config.timerStartTime,
-          timerPausedTimeLeftSeconds: config.timerPausedTimeLeftSeconds,
-          isTimerRunning: config.isTimerRunning,
-          isGameEnded: config.isGameEnded,
+          roundStatus: config.roundStatus,
+          roundStartedAt: config.roundStartedAt,
           answerKeyRevealed: config.answerKeyRevealed,
           roundName: config.roundName,
           serverTime: new Date().toISOString(),
@@ -53,3 +53,4 @@ export async function GET() {
     );
   }
 }
+

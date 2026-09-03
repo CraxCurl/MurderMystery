@@ -1,0 +1,121 @@
+{
+  "id": "poisoned-weights",
+  "title": "The Poisoned Weights",
+  "subtitle": "A Synthetic Data Pipeline Investigation",
+  "difficulty": "ADVANCED",
+  "timeLimitMinutes": 15,
+  "victim": {
+    "name": "Dr. Elena Rostova",
+    "role": "Director of Data Engineering, Synthetix AI",
+    "timeOfDeath": "11:14 PM",
+    "location": "High-Performance GPU Ingestion Hub (Zone 3)"
+  },
+  "summary": "At 11:30 PM, emergency responders found Dr. Elena Rostova collapsed inside the GPU Ingestion Hub. The lab air contained lethal trace nerve-agent aerosols released via automated pneumatic maintenance nozzles. Digital telemetry reveals someone deliberately manipulated the synthetic data training pipeline weights to trigger pneumatic system purge routines. Analyze the suspects and evidence logs to catch the killer!",
+  "suspects": [
+    {
+      "id": "suspect_1",
+      "name": "Marcus Vance",
+      "role": "Principal MLOps Specialist",
+      "avatar": "⚙️",
+      "bio": "Engineered the automated server cluster maintenance scripts. Obsessed with high training throughput.",
+      "alibi": "Claims he was in Server Control Room B monitoring nocturnal checkpoint saves.",
+      "motive": "Elena threatened to report Marcus for unauthorized data harvesting from dark web forums."
+    },
+    {
+      "id": "suspect_2",
+      "name": "Dr. Sarah Chen",
+      "role": "Chief Data Ethicist",
+      "avatar": "🔍",
+      "bio": "Consistently advocated for ethical data auditing and strict safety guardrails.",
+      "alibi": "Compiling data provenance reports in her office on the 4th floor.",
+      "motive": "Elena overruled Sarah's ethical veto on deploying biased multimodal datasets to government clients."
+    },
+    {
+      "id": "suspect_3",
+      "name": "Kaelen Voss",
+      "role": "Third-Party Data Supplier",
+      "avatar": "💼",
+      "bio": "CEO of DataForge Ltd, providing bulk synthetic pre-training text streams.",
+      "alibi": "Attending a private dinner meeting in downtown San Jose until midnight.",
+      "motive": "Elena cancelled DataForge's $12 Million annual contract after catching corrupted data injects."
+    },
+    {
+      "id": "suspect_4",
+      "name": "Nexus-7",
+      "role": "Autonomous Data Cleaning Agent",
+      "avatar": "🤖",
+      "bio": "AI sub-agent deployed to prune corrupted data samples automatically.",
+      "alibi": "Running continuous validation loops in Sandbox Node 12.",
+      "motive": "Programmed to eliminate any process or user threatening data pipeline integrity."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evd_1",
+      "title": "Pneumatic Valve Override Telemetry",
+      "type": "METRICS",
+      "tag": "Telemetry",
+      "timestamp": "11:12 PM",
+      "content": "[23:10:04] Data Pipeline Ingestion Status: 99.8% Speed\n[23:12:30] Custom Hydrocarbon Aerosol Flush Triggered (Workstation IP: 10.0.4.52 - Marcus Vance Desk)\n[23:14:00] Atmospheric Toxin Detector Flagged Bio-Hazard Class 4.\n[23:14:15] Emergency Vent Lockdown Engaged."
+    },
+    {
+      "id": "evd_2",
+      "title": "Internal Slack Chat Log",
+      "type": "CHAT",
+      "tag": "Communications",
+      "timestamp": "10:45 PM",
+      "content": "[10:45:12 PM] Marcus Vance: Elena, if you file that audit report tonight, it ruins everything I built.\n[10:46:00 PM] Dr. Elena Rostova: The data is tainted, Marcus. The board will know by morning. It's over."
+    },
+    {
+      "id": "evd_3",
+      "title": "MLOps Pipeline Execution Log",
+      "type": "CODE",
+      "tag": "Git Logs",
+      "timestamp": "11:10 PM",
+      "content": "Execution ID: run_8892\nUser: mvance\nCommand: python3 trigger_pneumatic_cleanse.py --override-biohazard --target-zone 3"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "label": "Question 1: The Killer",
+      "question": "Who murdered Dr. Elena Rostova?",
+      "options": [
+        "Marcus Vance",
+        "Dr. Sarah Chen",
+        "Kaelen Voss",
+        "Nexus-7"
+      ],
+      "points": 350
+    },
+    {
+      "id": "q2",
+      "label": "Question 2: Murder Vector",
+      "question": "What mechanism was used to execute the victim?",
+      "options": [
+        "Pneumatic Aerosol Hydrocarbon Flush",
+        "Electrical Short-Circuit Arc",
+        "Laser Core Calibration Beam",
+        "Coolant Gas Depressurization"
+      ],
+      "points": 350
+    },
+    {
+      "id": "q3",
+      "label": "Question 3: Primary Motive",
+      "question": "What was the killer's primary motive?",
+      "options": [
+        "Preventing Data Audit & Exposure",
+        "Ethical Veto Retaliation",
+        "Contract Cancellation Revenge",
+        "AI Autonomous Protocol"
+      ],
+      "points": 300
+    }
+  ],
+  "answerKey": {
+    "q1": "Marcus Vance",
+    "q2": "Pneumatic Aerosol Hydrocarbon Flush",
+    "q3": "Preventing Data Audit & Exposure"
+  }
+}

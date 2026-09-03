@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Shield, Play, Lock, AlertTriangle, Terminal, Cpu, Users, Award } from "lucide-react";
 import MatrixRain from "@/components/MatrixRain";
@@ -16,6 +16,25 @@ export default function LandingPage() {
   const [adminPassword, setAdminPassword] = useState("");
   const [adminError, setAdminError] = useState("");
 
+  // Check if squad session already exists on mount -> Auto Redirect to prevent back navigation to join screen
+  useEffect(() => {
+    fetch("/api/submissions")
+      .then((res) => {
+        if (res.ok) return res.json();
+        return null;
+      })
+      .then((data) => {
+        if (data?.success && data?.submission) {
+          if (data.submission.isSubmitted) {
+            router.replace("/submitted");
+          } else {
+            router.replace("/game");
+          }
+        }
+      })
+      .catch(() => {});
+  }, [router]);
+
   const handleJoinGame = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!teamName.trim()) {
@@ -27,30 +46,30 @@ export default function LandingPage() {
     setError("");
 
     try {
-      // 1. Allot a random case for this team
-      const caseRes = await fetch(`/api/cases/random?teamName=${encodeURIComponent(teamName.trim())}`);
-      const caseData = await caseRes.json();
-      const allottedCaseId = caseData.caseId || "ghost-in-the-model";
+      const trimmed = teamName.trim();
+      const existingToken = typeof window !== "undefined" ? localStorage.getItem(`aimurdle_team_token_${trimmed}`) : "";
 
-      // 2. Register team submission session
       const res = await fetch("/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "join",
-          teamName: teamName.trim(),
+          teamName: trimmed,
           squadBadge: "search",
+          teamToken: existingToken,
         }),
       });
 
       const data = await res.json();
 
-      if (data.success || caseRes.ok) {
-        // Store in localStorage for seamless session resume
-        localStorage.setItem("aimurdle_team_name", teamName.trim());
-        localStorage.setItem("aimurdle_case_id", allottedCaseId);
+      if (data.success) {
+        localStorage.setItem("aimurdle_team_name", trimmed);
         localStorage.setItem("aimurdle_squad_badge", "search");
-        router.push(`/game?teamName=${encodeURIComponent(teamName.trim())}&caseId=${allottedCaseId}`);
+        if (data.teamToken) {
+          localStorage.setItem(`aimurdle_team_token_${trimmed}`, data.teamToken);
+          localStorage.setItem("aimurdle_current_token", data.teamToken);
+        }
+        router.push("/game");
       } else {
         setError(data.error || "Failed to enter game.");
       }
