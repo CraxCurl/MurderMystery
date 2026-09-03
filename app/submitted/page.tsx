@@ -233,14 +233,7 @@ function SubmittedContent() {
               </p>
             </div>
 
-            <div className="pt-2">
-              <button
-                onClick={() => router.push(`/game?teamName=${encodeURIComponent(submission.teamName)}`)}
-                className="px-4 py-2 border-2 border-black bg-white hover:bg-[#fff5e2] text-black text-xs font-bold uppercase shadow-[4px_4px_0px_#000000] active:translate-x-[1px] active:translate-y-[1px] transition"
-              >
-                REVIEW CASE DOSSIER & EVIDENCE
-              </button>
-            </div>
+
           </div>
         ) : (
           /* Revealed Results Mode */
@@ -336,22 +329,7 @@ function SubmittedContent() {
               </div>
             </div>
 
-            {/* Bottom Actions */}
-            <div className="pt-3 border-t-2 border-black flex justify-between items-center">
-              <button
-                onClick={() => router.push(`/game?teamName=${encodeURIComponent(submission.teamName)}`)}
-                className="px-3.5 py-2 border-2 border-black bg-white hover:bg-[#fff5e2] text-xs font-bold uppercase text-black shadow-[4px_4px_0px_#000000] transition"
-              >
-                RETURN TO DOSSIER
-              </button>
 
-              <button
-                onClick={handleRegisterNewSquad}
-                className="px-4 py-2 bg-[#A30B37] hover:bg-[#85082c] text-white border-[3px] border-black text-xs font-bold uppercase shadow-[4px_4px_0px_#000000] transition"
-              >
-                CASE CLOSED / LOBBY
-              </button>
-            </div>
           </div>
         )}
       </div>
