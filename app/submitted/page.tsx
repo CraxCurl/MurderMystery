@@ -14,6 +14,7 @@ import {
   FileCheck,
   Check,
   Trophy,
+  Users,
 } from "lucide-react";
 import SquadIconDisplay from "@/components/SquadIconDisplay";
 
@@ -25,6 +26,7 @@ function SubmittedContent() {
   const teamNameFromQuery = searchParams.get("teamName") || "";
   const [teamName, setTeamName] = useState(teamNameFromQuery || (typeof window !== "undefined" ? localStorage.getItem("aimurdle_team_name") : "") || "Special Sleuths");
   const [teamToken, setTeamToken] = useState("");
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   // Prevent Browser Back Button from leaving the submitted page
   useEffect(() => {
@@ -96,7 +98,14 @@ function SubmittedContent() {
   };
 
   const isRemovedOrMissing = !submission || subRes?.isRemoved;
-  const leaderboardList = subRes?.leaderboard || [];
+  const leaderboardList: any[] = subRes?.leaderboard || [];
+
+  // Calculate current squad rank
+  const squadRankIndex = leaderboardList.findIndex(
+    (item: any) => item.teamName?.toLowerCase().trim() === submission?.teamName?.toLowerCase().trim()
+  );
+  const squadRank = squadRankIndex !== -1 ? squadRankIndex + 1 : null;
+  const totalSquads = leaderboardList.length;
 
   // ── ENDING / THANKS FOR PLAYING SCREEN (When squad is removed or lobby reset) ──
   if (isRemovedOrMissing) {
@@ -203,18 +212,26 @@ function SubmittedContent() {
             </div>
 
             {/* Squad Identity Box */}
-            <div className="p-4 border-2 border-black bg-[#fff5e2] shadow-[4px_4px_0px_#000000] flex items-center justify-center space-x-3">
-              <div className="w-10 h-10 border-2 border-black bg-white flex items-center justify-center text-black">
-                <SquadIconDisplay iconId={submission.squadBadge} className="w-5 h-5" />
+            <div className="p-4 border-2 border-black bg-[#fff5e2] shadow-[4px_4px_0px_#000000] flex flex-col items-center justify-center space-y-2">
+              <div className="flex items-center space-x-3">
+                <div className="w-9 h-9 border-2 border-black bg-white flex items-center justify-center text-black">
+                  <SquadIconDisplay iconId={submission.squadBadge} className="w-4 h-4" />
+                </div>
+                <div className="text-left">
+                  <span className="text-[10px] font-bold text-[#6b7280] uppercase block">
+                    INVESTIGATOR SQUAD:
+                  </span>
+                  <span className="text-sm md:text-base font-black uppercase text-black">
+                    {submission.teamName}
+                  </span>
+                </div>
               </div>
-              <div className="text-left">
-                <span className="text-[10px] font-bold text-[#6b7280] uppercase block">
-                  INVESTIGATOR SQUAD:
-                </span>
-                <span className="text-sm md:text-base font-black uppercase text-black">
-                  {submission.teamName}
-                </span>
-              </div>
+
+              {squadRank && (
+                <div className="inline-block px-3 py-1 bg-[#A30B37] text-white border-2 border-black text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000]">
+                  RANK #{squadRank} OF {totalSquads} SQUADS
+                </div>
+              )}
             </div>
 
             <p className="text-xs leading-relaxed text-black max-w-md mx-auto">
@@ -233,7 +250,73 @@ function SubmittedContent() {
               </p>
             </div>
 
+            {/* Leaderboard Toggle Button */}
+            <div className="pt-2">
+              <button
+                onClick={() => setShowLeaderboard(!showLeaderboard)}
+                className="w-full py-2.5 bg-[#fff5e2] hover:bg-black hover:text-white border-2 border-black font-black text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shadow-[3px_3px_0px_#000] transition"
+              >
+                <Trophy className="w-4 h-4 text-[#A30B37]" />
+                <span>{showLeaderboard ? "[ HIDE LIVE LEADERBOARD ]" : "[ VIEW LIVE LEADERBOARD ]"}</span>
+              </button>
 
+              {showLeaderboard && (
+                <div className="mt-3 space-y-2 text-left">
+                  <div className="flex justify-between items-center border-b-2 border-black pb-1">
+                    <h3 className="text-xs font-black uppercase text-black">
+                      [ COMPETING SQUADS LEADERBOARD ]
+                    </h3>
+                    <span className="text-[10px] font-bold text-[#6b7280]">
+                      {totalSquads} SQUADS TOTAL
+                    </span>
+                  </div>
+
+                  <div className="border-2 border-black overflow-x-auto bg-white shadow-[2px_2px_0px_#000]">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b-2 border-black bg-[#f5f5f5] text-black font-bold uppercase">
+                          <th className="p-2.5">Rank</th>
+                          <th className="p-2.5">Squad Name</th>
+                          <th className="p-2.5 text-center">Status</th>
+                          <th className="p-2.5 text-right">Score</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-black">
+                        {leaderboardList.map((item: any, idx: number) => {
+                          const isCurrentSquad = item.teamName?.toLowerCase().trim() === submission?.teamName?.toLowerCase().trim();
+                          return (
+                            <tr
+                              key={item.teamName}
+                              className={
+                                isCurrentSquad
+                                  ? "bg-[#fff5e2] font-black border-l-4 border-l-[#A30B37]"
+                                  : "hover:bg-[#fbfbf9]"
+                              }
+                            >
+                              <td className="p-2.5 font-bold">#{idx + 1}</td>
+                              <td className="p-2.5 font-bold uppercase text-black flex items-center space-x-1.5">
+                                <span>{item.teamName}</span>
+                                {isCurrentSquad && (
+                                  <span className="px-1.5 py-0.5 border border-black bg-[#A30B37] text-white text-[9px] font-bold uppercase">
+                                    YOU
+                                  </span>
+                                )}
+                              </td>
+                              <td className="p-2.5 text-center font-bold text-[#6b7280] text-[10px] uppercase">
+                                {item.isSubmitted ? "SEALED" : "ACTIVE"}
+                              </td>
+                              <td className="p-2.5 text-right font-black text-black">
+                                {item.score || 0} PTS
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           /* Revealed Results Mode */
@@ -247,8 +330,14 @@ function SubmittedContent() {
               </h1>
             </div>
 
-            {/* Scorecard Box */}
+            {/* Scorecard Box with Squad Rank */}
             <div className="p-5 border-2 border-black bg-[#fff5e2] shadow-[4px_4px_0px_#000000] text-center space-y-2">
+              {squadRank && (
+                <div className="inline-block px-3 py-1 bg-[#A30B37] text-white border-2 border-black text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000] mb-1">
+                  RANK #{squadRank} OF {totalSquads} SQUADS
+                </div>
+              )}
+
               <div className="flex items-center justify-center space-x-2">
                 <div className="w-7 h-7 border border-black bg-white flex items-center justify-center">
                   <SquadIconDisplay iconId={submission.squadBadge} className="w-4 h-4 text-black" />
@@ -329,7 +418,77 @@ function SubmittedContent() {
               </div>
             </div>
 
+            {/* Live Leaderboard Section */}
+            <div className="pt-2">
+              <button
+                onClick={() => setShowLeaderboard(!showLeaderboard)}
+                className="w-full py-2.5 bg-[#fff5e2] hover:bg-black hover:text-white border-2 border-black font-black text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shadow-[3px_3px_0px_#000] transition"
+              >
+                <Trophy className="w-4 h-4 text-[#A30B37]" />
+                <span>{showLeaderboard ? "[ HIDE LIVE LEADERBOARD ]" : "[ VIEW LIVE LEADERBOARD ]"}</span>
+              </button>
 
+              {showLeaderboard && (
+                <div className="mt-3 space-y-2 text-left">
+                  <div className="flex justify-between items-center border-b-2 border-black pb-1">
+                    <h3 className="text-xs font-black uppercase text-black">
+                      [ COMPETING SQUADS LEADERBOARD ]
+                    </h3>
+                    <span className="text-[10px] font-bold text-[#6b7280]">
+                      {totalSquads} SQUADS TOTAL
+                    </span>
+                  </div>
+
+                  <div className="border-2 border-black overflow-x-auto bg-white shadow-[2px_2px_0px_#000]">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b-2 border-black bg-[#f5f5f5] text-black font-bold uppercase">
+                          <th className="p-2.5">Rank</th>
+                          <th className="p-2.5">Squad Name</th>
+                          <th className="p-2.5 text-center">Correct</th>
+                          <th className="p-2.5 text-center">Time</th>
+                          <th className="p-2.5 text-right">Score</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-black">
+                        {leaderboardList.map((item: any, idx: number) => {
+                          const isCurrentSquad = item.teamName?.toLowerCase().trim() === submission?.teamName?.toLowerCase().trim();
+                          return (
+                            <tr
+                              key={item.teamName}
+                              className={
+                                isCurrentSquad
+                                  ? "bg-[#fff5e2] font-black border-l-4 border-l-[#A30B37]"
+                                  : "hover:bg-[#fbfbf9]"
+                              }
+                            >
+                              <td className="p-2.5 font-bold">#{idx + 1}</td>
+                              <td className="p-2.5 font-bold uppercase text-black flex items-center space-x-1.5">
+                                <span>{item.teamName}</span>
+                                {isCurrentSquad && (
+                                  <span className="px-1.5 py-0.5 border border-black bg-[#A30B37] text-white text-[9px] font-bold uppercase">
+                                    YOU
+                                  </span>
+                                )}
+                              </td>
+                              <td className="p-2.5 text-center font-bold text-[#A30B37]">
+                                {item.breakdown?.correctCount || 0} / 3
+                              </td>
+                              <td className="p-2.5 text-center text-[#6b7280]">
+                                {item.timeTakenSeconds || 0}s
+                              </td>
+                              <td className="p-2.5 text-right font-black text-black">
+                                {item.score || 0} PTS
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
