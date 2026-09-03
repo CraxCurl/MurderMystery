@@ -2,14 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, Play, Lock, AlertTriangle, Terminal, Cpu, Users, Award, Check } from "lucide-react";
-import { SQUAD_ICONS } from "@/lib/squad-icons";
+import { Shield, Play, Lock, AlertTriangle, Terminal, Cpu, Users, Award } from "lucide-react";
+import MatrixRain from "@/components/MatrixRain";
 
 export default function LandingPage() {
   const router = useRouter();
   const [teamName, setTeamName] = useState("");
-  const [selectedBadge, setSelectedBadge] = useState("search");
-  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -29,23 +27,30 @@ export default function LandingPage() {
     setError("");
 
     try {
+      // 1. Allot a random case for this team
+      const caseRes = await fetch(`/api/cases/random?teamName=${encodeURIComponent(teamName.trim())}`);
+      const caseData = await caseRes.json();
+      const allottedCaseId = caseData.caseId || "ghost-in-the-model";
+
+      // 2. Register team submission session
       const res = await fetch("/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "join",
           teamName: teamName.trim(),
-          squadBadge: selectedBadge,
+          squadBadge: "search",
         }),
       });
 
       const data = await res.json();
 
-      if (data.success) {
+      if (data.success || caseRes.ok) {
         // Store in localStorage for seamless session resume
         localStorage.setItem("aimurdle_team_name", teamName.trim());
-        localStorage.setItem("aimurdle_squad_badge", selectedBadge);
-        router.push(`/game?teamName=${encodeURIComponent(teamName.trim())}`);
+        localStorage.setItem("aimurdle_case_id", allottedCaseId);
+        localStorage.setItem("aimurdle_squad_badge", "search");
+        router.push(`/game?teamName=${encodeURIComponent(teamName.trim())}&caseId=${allottedCaseId}`);
       } else {
         setError(data.error || "Failed to enter game.");
       }
@@ -62,13 +67,13 @@ export default function LandingPage() {
       setAdminError("Password is required.");
       return;
     }
-    // Store password token in localStorage & redirect
     localStorage.setItem("aimurdle_admin_pass", adminPassword);
     router.push("/admin");
   };
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 cyber-bg-grid">
+    <main className="relative flex-1 flex flex-col items-center justify-center p-4 md:p-8 cyber-bg-grid min-h-screen overflow-hidden">
+      <MatrixRain />
       {/* Top Navbar */}
       <header className="w-full max-w-6xl flex justify-between items-center py-4 mb-6 border-b border-slate-800">
         <div className="flex items-center space-x-2">
@@ -76,7 +81,7 @@ export default function LandingPage() {
           <span className="text-xl font-bold tracking-widest text-slate-100 glow-cyan">
             AI<span className="text-cyber-cyan">MURDLE</span>
           </span>
-          <span className="text-xs px-2 py-0.5 rounded bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan">
+          <span className="text-xs px-2 py-0.5 rounded bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan font-mono">
             v1.0 LIVE
           </span>
         </div>
@@ -92,102 +97,47 @@ export default function LandingPage() {
 
       {/* Hero Header */}
       <div className="text-center max-w-3xl mb-8">
-        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-slate-900/80 border border-cyber-cyan/40 mb-4 text-xs text-cyber-cyan">
+        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-slate-900/80 border border-cyber-cyan/40 mb-4 text-xs text-cyber-cyan font-mono">
           <Terminal className="w-4 h-4" />
-          <span>CRIME SCENE: NeuraCore Quantum-LLM Cleanroom (Zone 7)</span>
+          <span>AIMURDLE — LIVE INVESTIGATION PLATFORM</span>
         </div>
 
         <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white mb-4">
-          SOLVE THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan via-cyber-green to-cyber-magenta glow-cyan">MURDER IN THE MODEL</span>
+          AI <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan via-cyber-green to-cyber-magenta glow-cyan">MURDER MYSTERY</span> CHALLENGE
         </h1>
 
         <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-2xl mx-auto">
-          Dr. Evan Vance is dead. Thermal feeds cut off. The liquid nitrogen cooling valves were forced open. 
-          Assemble your investigation squad, examine the evidence locker, interrogate AI suspects, and solve the case before the timer expires!
+          Uncover the clues. Name the killer. Race against the clock.<br />
+          In AI, even ghosts leave traces. Find them.
         </p>
       </div>
 
       {/* Main Team Join Card */}
-      <div className="w-full max-w-lg bg-slate-900/80 border border-slate-800 hover:border-cyber-cyan/50 rounded-2xl p-6 md:p-8 backdrop-blur-xl shadow-2xl transition duration-300 relative overflow-hidden mb-12">
+      <div className="w-full max-w-md bg-slate-900/80 border border-slate-800 hover:border-cyber-cyan/50 rounded-2xl p-6 md:p-8 backdrop-blur-xl shadow-2xl transition duration-300 relative overflow-hidden mb-12">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyber-cyan via-cyber-magenta to-cyber-green" />
 
         <div className="flex items-center space-x-3 mb-6">
           <Users className="w-6 h-6 text-cyber-cyan" />
           <div>
             <h2 className="text-lg font-bold text-slate-100">Squad Registration</h2>
-            <p className="text-xs text-slate-400">Enter your team name to access case dossiers & evidence locker.</p>
+            <p className="text-xs text-slate-400">Enter your team name to be allotted your mystery case dossier.</p>
           </div>
         </div>
 
         <form onSubmit={handleJoinGame} className="space-y-6">
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-300 tracking-wider mb-2">
+            <label className="block text-xs font-semibold uppercase text-slate-300 tracking-wider mb-2 font-mono">
               Investigator Team Name
             </label>
             <input
               type="text"
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
-              placeholder="e.g. Cyber Sleuths, Team Matrix"
+              placeholder="Enter team name..."
               maxLength={30}
-              className="w-full bg-slate-950/80 border border-slate-700 focus:border-cyber-cyan focus:ring-1 focus:ring-cyber-cyan rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-600 outline-none transition duration-200"
+              className="w-full bg-slate-950/80 border border-slate-700 focus:border-cyber-cyan focus:ring-1 focus:ring-cyber-cyan rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-600 outline-none transition duration-200 font-mono"
               required
             />
-          </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-xs font-semibold uppercase text-slate-300 tracking-wider">
-                Select Squad Emblem ({SQUAD_ICONS.length} Vector Icons Available)
-              </label>
-            </div>
-
-            {/* Category Filter Tabs */}
-            <div className="flex space-x-1.5 overflow-x-auto pb-2 mb-3">
-              {["ALL", "Detective", "Tech", "Cyber", "Tactical"].map((cat) => (
-                <button
-                  type="button"
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase transition ${
-                    selectedCategory === cat
-                      ? "bg-cyber-cyan text-slate-950"
-                      : "bg-slate-950 border border-slate-800 text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            {/* Icon Options Grid */}
-            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-48 overflow-y-auto p-1 bg-slate-950/60 rounded-xl border border-slate-800">
-              {SQUAD_ICONS.filter((item) => selectedCategory === "ALL" || item.category === selectedCategory).map((item) => {
-                const Icon = item.icon;
-                const isSelected = selectedBadge === item.id;
-                return (
-                  <button
-                    type="button"
-                    key={item.id}
-                    onClick={() => setSelectedBadge(item.id)}
-                    className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition duration-200 group relative ${
-                      isSelected
-                        ? "border-cyber-cyan bg-cyber-cyan/20 shadow-cyan-glow text-cyber-cyan"
-                        : "border-slate-800 bg-slate-900/50 hover:border-slate-700 text-slate-400 hover:text-slate-200"
-                    }`}
-                    title={item.name}
-                  >
-                    <Icon className="w-5 h-5 mb-1" />
-                    <span className="text-[10px] font-medium truncate w-full px-0.5">{item.name}</span>
-                    {isSelected && (
-                      <span className="absolute top-1 right-1 w-3 h-3 bg-cyber-cyan text-slate-950 rounded-full flex items-center justify-center text-[8px] font-bold">
-                        ✓
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
           {error && (
@@ -200,10 +150,10 @@ export default function LandingPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-cyber-cyan to-cyber-green hover:from-cyber-cyan/90 hover:to-cyber-green/90 text-slate-950 font-bold tracking-wider uppercase flex items-center justify-center space-x-2 shadow-cyan-glow transition transform active:scale-95 disabled:opacity-50"
+            className="w-full py-4 rounded-xl bg-gradient-to-r from-cyber-cyan to-cyber-green hover:from-cyber-cyan/90 hover:to-cyber-green/90 text-slate-950 font-bold tracking-wider uppercase flex items-center justify-center space-x-2 shadow-cyan-glow transition transform active:scale-95 disabled:opacity-50 font-mono"
           >
             {loading ? (
-              <span>ACCESSING CASE FILES...</span>
+              <span>ALLOTTING CASE FILE...</span>
             ) : (
               <>
                 <Play className="w-5 h-5 fill-slate-950" />
@@ -224,8 +174,8 @@ export default function LandingPage() {
 
         <div className="p-4 rounded-xl bg-slate-900/40 border border-slate-800 text-left">
           <Users className="w-6 h-6 text-cyber-magenta mb-2" />
-          <h3 className="text-sm font-bold text-slate-200 mb-1">4 Prime AI Suspects</h3>
-          <p className="text-xs text-slate-400">Interrogate Dr. Thorne, Whistleblower Maya Lin, Autonomous Cipher-9, and Investor Vance.</p>
+          <h3 className="text-sm font-bold text-slate-200 mb-1">AI Suspect Dossiers</h3>
+          <p className="text-xs text-slate-400">Interrogate suspects, examine motives and alibis, and shatter false statements.</p>
         </div>
 
         <div className="p-4 rounded-xl bg-slate-900/40 border border-slate-800 text-left">
@@ -258,14 +208,14 @@ export default function LandingPage() {
 
             <form onSubmit={handleAdminLogin} className="space-y-4">
               <div>
-                <label className="block text-xs uppercase text-slate-300 mb-1">Access Key</label>
+                <label className="block text-xs uppercase text-slate-300 mb-1 font-mono">Access Key</label>
                 <div className="relative">
                   <input
                     type="password"
                     value={adminPassword}
                     onChange={(e) => setAdminPassword(e.target.value)}
                     placeholder="Enter Admin Password (Default: admin123)"
-                    className="w-full bg-slate-950 border border-slate-700 focus:border-cyber-magenta rounded-xl px-4 py-2.5 text-sm text-slate-100 outline-none"
+                    className="w-full bg-slate-950 border border-slate-700 focus:border-cyber-magenta rounded-xl px-4 py-2.5 text-sm text-slate-100 outline-none font-mono"
                     required
                   />
                   <Lock className="w-4 h-4 text-slate-500 absolute right-3 top-3" />
@@ -276,7 +226,7 @@ export default function LandingPage() {
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-cyber-magenta hover:bg-cyber-magenta/90 text-white font-bold text-xs uppercase tracking-wider transition"
+                className="w-full py-3 rounded-xl bg-cyber-magenta hover:bg-cyber-magenta/90 text-white font-bold text-xs uppercase tracking-wider transition font-mono"
               >
                 ACCESS COMMAND DASHBOARD
               </button>

@@ -28,8 +28,10 @@ function GameContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const teamNameFromQuery = searchParams.get("teamName") || "";
+  const caseIdFromQuery = searchParams.get("caseId") || "";
 
   const [teamName, setTeamName] = useState("");
+  const [caseId, setCaseId] = useState<string>("");
   const [squadBadge, setSquadBadge] = useState("🔍");
   const [activeTab, setActiveTab] = useState<"dossier" | "suspects" | "evidence" | "notebook">("dossier");
 
@@ -47,8 +49,13 @@ function GameContent() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  // SWR Hooks
-  const { data: caseRes } = useSWR("/api/cases/ghost-in-the-model", fetcher);
+  // Dynamic SWR Case fetching based on allotted caseId or random team allotment
+  const activeCaseId = caseId || caseIdFromQuery || (typeof window !== "undefined" ? localStorage.getItem("aimurdle_case_id") : "");
+  const caseApiUrl = activeCaseId
+    ? `/api/cases/${activeCaseId}`
+    : `/api/cases/random${teamNameFromQuery ? `?teamName=${encodeURIComponent(teamNameFromQuery)}` : ""}`;
+
+  const { data: caseRes } = useSWR(caseApiUrl, fetcher);
   const { data: configRes } = useSWR("/api/config", fetcher, { refreshInterval: 3000 });
 
   const caseData = caseRes?.case;

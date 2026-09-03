@@ -80,13 +80,14 @@ export default function AdminPage() {
   // SWR Hooks
   const { data: subData, error: subError } = useSWR(
     isAuthenticated ? ["/api/admin/submissions", adminPassword] : null,
-    ([url, pass]) => fetcher(url, pass),
+    ([url, pass]: [string, string]) => fetcher(url, pass),
     { refreshInterval: 2000 }
   );
 
   const { data: configData } = useSWR(
     isAuthenticated ? ["/api/config", adminPassword] : "/api/config",
-    ([url, pass]) => (pass ? fetcher(url, pass) : fetcher(url)),
+    (arg: string | [string, string]) =>
+      Array.isArray(arg) ? fetcher(arg[0], arg[1]) : fetcher(arg),
     { refreshInterval: 2000 }
   );
 
