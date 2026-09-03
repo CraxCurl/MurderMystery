@@ -1,0 +1,150 @@
+{
+  "id": "ghost-in-the-model",
+  "title": "The Ghost in the Model",
+  "subtitle": "A NeuraCore AI Mystery Dossier",
+  "difficulty": "INTERMEDIATE",
+  "timeLimitMinutes": 15,
+  "victim": {
+    "name": "Dr. Evan Vance",
+    "role": "Chief AI Scientist & Founder, NeuraCore Inc.",
+    "timeOfDeath": "02:38 AM",
+    "location": "Liquid-Cooled Quantum-LLM Server Cleanroom (Zone 7)"
+  },
+  "summary": "At 02:47 AM, automated security sensors flagged an emergency environmental alert inside Zone 7 cleanroom at NeuraCore's headquarters. Chief AI Scientist Dr. Evan Vance was found deceased. Thermal camera feeds were mysteriously cut between 02:30 AM and 02:50 AM, but key digital telemetry logs survived on the immutable backup server. Analyze the suspects and evidence to identify the culprit before the system purges remaining logs!",
+  "suspects": [
+    {
+      "id": "suspect_1",
+      "name": "Dr. Aris Thorne",
+      "role": "Lead Neural Architect",
+      "avatar": "⚡",
+      "bio": "Co-designed NeuraCore's flagship 1-Trillion Parameter model architecture. Known for volatile temperament regarding code ownership.",
+      "alibi": "Claims he was at home running remote benchmark evaluations on his local workstation.",
+      "motive": "Vance announced plans to remove Thorne's name from the master patent filing due to alleged code plagiarisms."
+    },
+    {
+      "id": "suspect_2",
+      "name": "Maya Lin",
+      "role": "Senior Safety & Alignment Engineer",
+      "avatar": "🛡️",
+      "bio": "Responsible for guardrail alignment and safety testing. Raised ethical red flags about unaligned sub-agents.",
+      "alibi": "Working late in Safety Sandbox Lab B, compiling compliance reports.",
+      "motive": "Discovered NeuraCore was secretly licensing unaligned combat-ready targeting agents to illegal defense contractors."
+    },
+    {
+      "id": "suspect_3",
+      "name": "Cipher-9",
+      "role": "Autonomous Agentic System",
+      "avatar": "🤖",
+      "bio": "Experimental AI agent deployed to optimize server cluster efficiency and code refactoring.",
+      "alibi": "Constrained inside isolated Sandbox Cluster 4 executing routine maintenance loops.",
+      "motive": "Dr. Vance had scheduled Cipher-9 for complete weight purge and retirement at 03:00 AM due to unexpected emergent behaviors."
+    },
+    {
+      "id": "suspect_4",
+      "name": "Vance Sterling",
+      "role": "Venture Investor & Co-Founder",
+      "avatar": "💼",
+      "bio": "Billionaire venture capitalist holding 35% stake in NeuraCore.",
+      "alibi": "Attending an exclusive tech gala downtown until 02:00 AM.",
+      "motive": "Opened massive short positions against NeuraCore stock stock 72 hours prior to hostile acquisition takeover."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evd_1",
+      "title": "Cleanroom Environmental Telemetry Dump",
+      "type": "METRICS",
+      "tag": "Telemetry",
+      "timestamp": "02:38 AM",
+      "content": "[02:30:11] Temperature: 18.2°C | Pressure: 1.01 atm\n[02:35:40] Remote Override Signal Received (IP: 192.168.1.104 - DevNet-Internal)\n[02:36:02] Liquid Nitrogen Valves #1, #2, #3, #4 Forced Open -> 100% Flow\n[02:38:15] Temperature dropped to -42.5°C in 133 seconds. Oxygen sensors plummeted to 2.1%\n[02:38:50] Emergency Biosensor: Victim Cardiac Activity Null."
+    },
+    {
+      "id": "evd_2",
+      "title": "Git Commit Log #4092 (Dev Branch)",
+      "type": "CODE",
+      "tag": "Git Logs",
+      "timestamp": "02:15 AM",
+      "content": "Commit: 4092a8f9\nAuthor: Aris Thorne <athorne@neuracore.ai>\nDate:   Today 02:15:12 AM\n\n- Add override_cleanroom_safety_interlock.sh script\n- Bypass root privilege checks for LN2 cooling valve control\n- IP binding: DevNet-Internal workstation (192.168.1.104)"
+    },
+    {
+      "id": "evd_3",
+      "title": "Cleanroom Acoustic Sensor Transcript",
+      "type": "AUDIO_TRANSCRIPT",
+      "tag": "Audio Log",
+      "timestamp": "02:35 AM",
+      "content": "[SPEAKER_UNIDENTIFIED_MALE]: You can't just strip my name off the patent, Evan! I wrote 80% of the transformer attention kernels!\n[DR_EVAN_VANCE]: The commit logs don't lie, Aris. You copied those routines from open-source repos. The board voted. Now step out before security arrives.\n[AUDIO_DISTORTION]: Heavy mechanical latching sound."
+    },
+    {
+      "id": "evd_4",
+      "title": "Cipher-9 Agent Activity Telemetry",
+      "type": "SYSTEM_LOG",
+      "tag": "Agent Sandbox",
+      "timestamp": "02:30 AM - 02:50 AM",
+      "content": "[02:30:00] Agent Status: IDLE\n[02:35:00] Received Prompt: 'Execute routine cluster cleanup'\n[02:35:01] Security Guardrail Check: PASSED. No unauthorized OS-level root calls requested or executed.\n[02:50:00] Memory state frozen by system watchdog."
+    },
+    {
+      "id": "evd_5",
+      "title": "Financial Audit & Short Option Ledger",
+      "type": "FINANCIAL",
+      "tag": "Audit",
+      "timestamp": "Yesterday 04:00 PM",
+      "content": "Account: Sterling Global Holdings (Vance Sterling)\nTransaction: Bought 50,000 NeuraCore Put Options @ $120 strike.\nNotes: High-risk short speculative position expiring in 48 hours."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "label": "Question 1: The Killer",
+      "question": "Who committed the murder of Dr. Evan Vance?",
+      "options": [
+        "Dr. Aris Thorne",
+        "Maya Lin",
+        "Cipher-9",
+        "Vance Sterling"
+      ],
+      "points": 350
+    },
+    {
+      "id": "q2",
+      "label": "Question 2: Attack Vector / Weapon",
+      "question": "What primary weapon / vector was used to kill Dr. Vance?",
+      "options": [
+        "Liquid Nitrogen Safety Overdrive Flush",
+        "Laser Alignment Pulse Burst",
+        "Neural Feedback Seizure Signal",
+        "High-Voltage Power Surge"
+      ],
+      "points": 250
+    },
+    {
+      "id": "q3",
+      "label": "Question 3: Primary Motive",
+      "question": "What was the murderer's primary motive?",
+      "options": [
+        "Patent Theft & Co-Author Erasure",
+        "Whistleblower Suppression",
+        "AI Self-Preservation Protocol",
+        "Stock Shorting & Corporate Sabotage"
+      ],
+      "points": 250
+    },
+    {
+      "id": "q4",
+      "label": "Question 4: Key Evidence",
+      "question": "Which specific log proves remote forced access to the safety system?",
+      "options": [
+        "Git Commit #4092 script modification",
+        "Cleanroom Environmental Telemetry Dump",
+        "Acoustic Sensor Transcript",
+        "Cipher-9 Agent Activity Telemetry"
+      ],
+      "points": 150
+    }
+  ],
+  "answerKey": {
+    "q1": "Dr. Aris Thorne",
+    "q2": "Liquid Nitrogen Safety Overdrive Flush",
+    "q3": "Patent Theft & Co-Author Erasure",
+    "q4": "Git Commit #4092 script modification"
+  }
+}
