@@ -219,7 +219,7 @@ export default function LandingPage() {
                   type="password"
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
-                  placeholder="Default: admin123"
+                  placeholder="Enter configured access key"
                   className="w-full bg-white border-2 border-black p-2.5 text-xs font-mono font-bold text-black placeholder-[#6b7280] outline-none shadow-[2px_2px_0px_#000000]"
                   required
                 />

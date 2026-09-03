@@ -237,7 +237,7 @@ export default function AdminPage() {
                 type="password"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
-                placeholder="Default: admin123"
+                placeholder="Enter configured access key"
                 className="w-full bg-white border-2 border-black p-3 text-xs font-mono font-bold text-black outline-none shadow-[2px_2px_0px_#000] focus:border-[#A30B37]"
                 required
               />

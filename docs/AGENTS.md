@@ -11,12 +11,10 @@ This document outlines the architectural patterns, conventions, and security gui
 - **Client Components (`"use client"`)**: Pages using interactive hooks (`useState`, `useEffect`, `useSearchParams`, `useSWR`) must include `"use client"` at the top.
 - **Suspense Boundary Requirement**: Any client page consuming `useSearchParams()` (such as `app/game/page.tsx` and `app/submitted/page.tsx`) **MUST** be wrapped in a `<Suspense>` boundary to prevent static pre-rendering build failures (`missing-suspense-with-csr-bailout`).
 
-### 2. Dual-Mode Database Architecture (`lib/mongodb.ts`)
-- The application is designed to function seamlessly both with a live **MongoDB Atlas** database and without one.
-- In `lib/mongodb.ts`:
-  - If `process.env.MONGODB_URI` is present, Mongoose connects and caches the serverless connection pool.
-  - If `MONGODB_URI` is missing or fails to connect, the system automatically falls back to an **In-Memory Store** (`global.inMemoryStore`).
-  - **Rule**: When adding or updating API endpoints, always maintain dual support for both MongoDB queries and fallback memory store mutations.
+### 2. Required Database Configuration (`lib/mongodb.ts`)
+- A live **MongoDB Atlas** database is required in every environment.
+- `MONGODB_URI` must be configured; missing or unreachable database connections fail safely and never fall back to in-memory data.
+- **Rule**: Do not add database fallbacks that allow deployed squads, rounds, or scores to run without MongoDB.
 
 ### 3. API Security & Cheating Prevention
 - **Answer Key Protection**: The master answer key (`answerKey`) stored in `data/cases/<caseId>.json` MUST NOT be exposed to the public client API (`/api/cases/[caseId]/route.ts`).
@@ -25,6 +23,7 @@ This document outlines the architectural patterns, conventions, and security gui
 
 ### 4. Admin Authentication
 - Admin API endpoints (`/api/admin/config`, `/api/admin/submissions`) require authentication verified via `lib/admin-auth.ts`.
+- `ADMIN_PASSWORD` is mandatory. There is no default admin password.
 - The client sends the password via `x-admin-password` header or `Authorization: Bearer <password>`.
 
 ---

@@ -79,7 +79,7 @@ aimurdle/
 - Host unlock triggers score breakdown, ranking, solution comparison, and victory confetti!
 
 ### 5. Host Admin Command Dashboard (`/admin`)
-- Protected by Admin Password (`admin123` default or `ADMIN_PASSWORD` in `.env`).
+- Protected by the required `ADMIN_PASSWORD` environment variable.
 - **Live Leaderboard**: Real-time ranking with score, correct count, and time taken.
 - **Projector Presentation View**: Fullscreen presentation display optimized for room projection.
 - **Timer Controls**: Start, Pause, Reset, +5m, -5m.
@@ -90,11 +90,11 @@ aimurdle/
 ## ⚙️ Environment Variables (`.env`)
 
 ```env
-# MongoDB Atlas Connection String (Optional: falls back to in-memory store if omitted)
+# Required MongoDB Atlas Connection String
 MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/aimurdle
 
-# Admin Command Dashboard Access Key
-ADMIN_PASSWORD=admin123
+# Required Admin Command Dashboard Access Key (use a long random secret)
+ADMIN_PASSWORD=replace-with-a-long-random-secret
 ```
 
 ---

@@ -15,9 +15,8 @@ This file records historical decisions, system context, scoring mechanics, and a
 
 ## 🔑 Key Technical Decisions & Rationale
 
-### 1. Zero-Config Database Fallback Store (`lib/mongodb.ts`)
-- **Problem**: Requiring an active MongoDB connection string upfront prevents instant out-of-the-box local testing or demoing.
-- **Solution**: Implemented a dual-layer connection manager. If `MONGODB_URI` is supplied in `.env`, Mongoose connects to MongoDB Atlas. If omitted or unreachable, the system seamlessly falls back to `global.inMemoryStore` so all APIs (`/api/submissions`, `/api/config`, `/api/admin/*`) continue working without errors.
+### 1. Required Persistent Database (`lib/mongodb.ts`)
+- **Decision**: The game requires MongoDB in every environment. If `MONGODB_URI` is missing or unreachable, APIs fail safely instead of creating temporary in-memory rounds or squads.
 
 ### 2. Next.js App Router Suspense Boundaries (`app/game/page.tsx`, `app/submitted/page.tsx`)
 - **Gotcha**: Using `useSearchParams()` directly in Client Components during static site compilation causes `missing-suspense-with-csr-bailout` build errors.
@@ -43,8 +42,8 @@ This file records historical decisions, system context, scoring mechanics, and a
 ## 🔐 Credentials & Environment Log
 
 - **Local Environment File**: `.env`
-- **Default Admin Password**: `admin123` (configurable via `ADMIN_PASSWORD` in `.env`)
-- **MongoDB URI**: Configured in `.env` for MongoDB Atlas database `AIMurdle`.
+- **Admin Password**: Must be configured through `ADMIN_PASSWORD`; no default is permitted.
+- **MongoDB URI**: Must be configured through `MONGODB_URI` for MongoDB Atlas.
 
 ---
 

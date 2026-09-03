@@ -73,8 +73,7 @@ export async function connectToDatabase(): Promise<{ isConnected: boolean }> {
   const MONGODB_URI = process.env.MONGODB_URI;
 
   if (!MONGODB_URI) {
-    console.warn("MONGODB_URI missing from environment variables.");
-    return { isConnected: false };
+    throw new Error("Server configuration error: MONGODB_URI is required.");
   }
 
   if (cached!.conn && mongoose.connection.readyState === 1) {
@@ -109,7 +108,7 @@ export async function connectToDatabase(): Promise<{ isConnected: boolean }> {
   } catch (e: any) {
     cached!.promise = null;
     console.error("MongoDB connection failed details:", e.message || e);
-    return { isConnected: false };
+    throw new Error("Database connection failed. Check MONGODB_URI and MongoDB network access.");
   }
 }
 
