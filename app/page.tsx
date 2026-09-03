@@ -101,7 +101,7 @@ export default function LandingPage() {
           <span>VOL. 1 // CASE #092</span>
           <span>THE DAILY MYSTERY DOSSIER</span>
           <a
-            href="/admin"
+            href="https://acmurdle.vercel.app/admin"
             className="px-2 py-0.5 border-2 border-black bg-white text-black hover:bg-[#fff5e2] font-bold shadow-[2px_2px_0px_#000] transition"
           >
             [ HOST LOGIN ]
