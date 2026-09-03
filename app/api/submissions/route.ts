@@ -57,6 +57,10 @@ async function getConfig() {
   return config;
 }
 
+// Scoring constants — max possible = 1000
+const BASE_PER_QUESTION = 250; // 3 questions × 250 = 750 max base
+const MAX_TIME_BONUS = 250;    // 250 time bonus → total cap 1000
+
 export async function GET(request: NextRequest) {
   try {
     const session = getSquadSessionFromReq(request);
@@ -84,6 +88,9 @@ export async function GET(request: NextRequest) {
       const config = await getConfig();
       const caseData = await loadCase(submission.caseId || "ghost-in-the-model");
 
+      // Only expose the answer key to the client after the host has revealed it
+      const answerKey = config.answerKeyRevealed ? (caseData.answerKey || {}) : undefined;
+
       return NextResponse.json({
         success: true,
         submission,
@@ -91,6 +98,7 @@ export async function GET(request: NextRequest) {
         roundStartedAt: config.roundStartedAt,
         timerDurationMinutes: config.timerDurationMinutes,
         caseData,
+        answerKey,
         serverTime: new Date().toISOString(),
       });
     }
@@ -108,6 +116,9 @@ export async function GET(request: NextRequest) {
     const cfg = memory.config;
     const caseData = await loadCase(submission.caseId || "ghost-in-the-model");
 
+    // Only expose the answer key to the client after the host has revealed it
+    const answerKey = cfg.answerKeyRevealed ? (caseData.answerKey || {}) : undefined;
+
     return NextResponse.json({
       success: true,
       submission,
@@ -115,6 +126,7 @@ export async function GET(request: NextRequest) {
       roundStartedAt: cfg.roundStartedAt || null,
       timerDurationMinutes: cfg.timerDurationMinutes || 15,
       caseData,
+      answerKey,
       serverTime: new Date().toISOString(),
     });
   } catch (error: any) {
@@ -294,24 +306,24 @@ export async function POST(request: NextRequest) {
 
         const config = await getConfig();
         const caseData = await loadCase(submission.caseId || "ghost-in-the-model");
-        const questions: Array<{ id: string; points?: number }> = caseData.questions || [];
+        const questions: Array<{ id: string }> = caseData.questions || [];
         const answerKey: Record<string, string> = caseData.answerKey || {};
 
         let correctCount = 0;
-        let basePoints = 0;
-
         questions.forEach((q) => {
           const teamAns = normalizeString(answers[q.id]);
           const correctAns = normalizeString(answerKey[q.id]);
           if (teamAns && correctAns && teamAns === correctAns) {
             correctCount++;
-            basePoints += q.points || 350;
           }
         });
 
+        const basePoints = correctCount * BASE_PER_QUESTION;
         const totalRoundSeconds = config.timerDurationMinutes * 60;
-        const timeBonus = correctCount > 0 ? Math.floor((Math.max(0, totalRoundSeconds - timeTakenSeconds) / totalRoundSeconds) * 250) : 0;
-        const totalScore = basePoints + timeBonus;
+        const timeBonus = correctCount > 0
+          ? Math.floor((Math.max(0, totalRoundSeconds - timeTakenSeconds) / totalRoundSeconds) * MAX_TIME_BONUS)
+          : 0;
+        const totalScore = Math.min(1000, basePoints + timeBonus);
 
         submission.answers = answers;
         submission.score = totalScore;
@@ -332,26 +344,26 @@ export async function POST(request: NextRequest) {
 
         const cfg = memory.config;
         const caseData = await loadCase(submission.caseId || "ghost-in-the-model");
-        const questions: Array<{ id: string; points?: number }> = caseData.questions || [];
+        const questions: Array<{ id: string }> = caseData.questions || [];
         const answerKey: Record<string, string> = caseData.answerKey || {};
 
         let correctCount = 0;
-        let basePoints = 0;
-
         questions.forEach((q) => {
           const teamAns = normalizeString(answers[q.id]);
           const correctAns = normalizeString(answerKey[q.id]);
           if (teamAns && correctAns && teamAns === correctAns) {
             correctCount++;
-            basePoints += q.points || 350;
           }
         });
 
+        const basePoints = correctCount * BASE_PER_QUESTION;
         const totalRoundSeconds = (cfg.timerDurationMinutes || 15) * 60;
-        const timeBonus = correctCount > 0 ? Math.floor((Math.max(0, totalRoundSeconds - timeTakenSeconds) / totalRoundSeconds) * 250) : 0;
+        const timeBonus = correctCount > 0
+          ? Math.floor((Math.max(0, totalRoundSeconds - timeTakenSeconds) / totalRoundSeconds) * MAX_TIME_BONUS)
+          : 0;
 
         submission.answers = answers;
-        submission.score = basePoints + timeBonus;
+        submission.score = Math.min(1000, basePoints + timeBonus);
         submission.breakdown = { correctCount, totalQuestions: questions.length || 3, basePoints, timeBonus };
         submission.timeTakenSeconds = timeTakenSeconds;
         submission.isSubmitted = true;

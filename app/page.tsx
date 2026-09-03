@@ -130,18 +130,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Case Incident Briefing Box (Aged Dark Amber Parchment) */}
-      <div className="w-full bg-[#fff5e2] border-[3px] border-black p-4 md:p-5 shadow-[4px_4px_0px_#000000] mb-6">
-        <div className="flex items-center justify-between pb-2 mb-2 border-b-2 border-black text-xs font-bold uppercase tracking-wider">
-          <span className="text-[#A30B37] font-black">[ CRIME SCENE REPORT ]</span>
-          <span className="text-[#6b7280]">ZONE 7 CLEANROOM</span>
-        </div>
-        <p className="text-xs md:text-sm leading-relaxed text-black">
-          At 02:47 AM, Chief AI Scientist <strong className="text-[#A30B37]">DR. EVAN VANCE</strong> was found deceased.
-          Thermal telemetry feeds were cut. Liquid nitrogen cooling valves were forced open.
-          Deduce who killed him, with what vector, and what motive before server logs purge!
-        </p>
-      </div>
+
 
       {/* Squad Registration Docket (Main Docket Card) */}
       <div className="w-full bg-white border-[3px] border-black p-5 md:p-6 shadow-[4px_4px_0px_#000000] mb-8">
@@ -193,29 +182,7 @@ export default function LandingPage() {
         </form>
       </div>
 
-      {/* 3 Dossier Modules Summary (Evidence & Interrogation Cards) */}
-      <div className="w-full space-y-3 mb-8">
-        <div className="p-3.5 bg-white border-2 border-black shadow-[3px_3px_0px_#000000] text-xs">
-          <span className="font-bold uppercase text-[#A30B37] block mb-0.5">
-            [ 1. EVIDENCE LOCKER ]
-          </span>
-          <span className="text-black">Thermal sensor dumps, Git commit #4092, wiretap audio logs, and hedge fund transactions.</span>
-        </div>
 
-        <div className="p-3.5 bg-white border-2 border-black shadow-[3px_3px_0px_#000000] text-xs">
-          <span className="font-bold uppercase text-[#A30B37] block mb-0.5">
-            [ 2. SUSPECT INTERROGATIONS ]
-          </span>
-          <span className="text-black">Review alibis and motives for Dr. Thorne, Maya Lin, Autonomous Cipher-9, and Vance Sterling.</span>
-        </div>
-
-        <div className="p-3.5 bg-white border-2 border-black shadow-[3px_3px_0px_#000000] text-xs">
-          <span className="font-bold uppercase text-[#A30B37] block mb-0.5">
-            [ 3. DEDUCTION ACCUSATION ]
-          </span>
-          <span className="text-black">Submit your sworn verdict for accuracy points plus speed bonus multiplier.</span>
-        </div>
-      </div>
 
       {/* Admin Login Modal */}
       {isAdminModalOpen && (

@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-
-const MONGODB_URI = process.env.MONGODB_URI;
+import dns from "dns";
 
 /**
  * Global cache interface to prevent redundant connections in Next.js hot reloads / serverless functions
@@ -71,30 +70,45 @@ if (!global.inMemoryStore) {
 }
 
 export async function connectToDatabase(): Promise<{ isConnected: boolean }> {
+  const MONGODB_URI = process.env.MONGODB_URI;
+
   if (!MONGODB_URI) {
+    console.warn("MONGODB_URI missing from environment variables.");
     return { isConnected: false };
   }
 
-  if (cached!.conn) {
+  if (cached!.conn && mongoose.connection.readyState === 1) {
     return { isConnected: true };
+  }
+
+  // Force public DNS resolvers to prevent Windows DNS SRV ECONNREFUSED error on mongodb+srv://
+  try {
+    dns.setServers(["8.8.8.8", "1.1.1.1", "8.8.4.4"]);
+  } catch {
+    // Ignore if custom DNS servers fail
   }
 
   if (!cached!.promise) {
     const opts = {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 10000,
     };
 
     cached!.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
+      console.log("Successfully connected to MongoDB Atlas!");
       return mongooseInstance;
+    }).catch((err) => {
+      console.error("MongoDB Atlas connection error:", err.message || err);
+      throw err;
     });
   }
 
   try {
     cached!.conn = await cached!.promise;
     return { isConnected: true };
-  } catch (e) {
+  } catch (e: any) {
     cached!.promise = null;
-    console.warn("MongoDB connection failed, falling back to in-memory store:", e);
+    console.error("MongoDB connection failed details:", e.message || e);
     return { isConnected: false };
   }
 }

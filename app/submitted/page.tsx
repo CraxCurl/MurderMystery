@@ -202,17 +202,18 @@ function SubmittedContent() {
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b-2 border-black bg-[#f5f5f5] text-black">
-                      <th className="p-2.5 font-bold uppercase">Question</th>
-                      <th className="p-2.5 font-bold uppercase">Your Deduction</th>
-                      <th className="p-2.5 font-bold uppercase">Official Solution</th>
-                      <th className="p-2.5 font-bold uppercase text-right">Result</th>
+                      <th className="p-2.5 font-bold uppercase w-1/4">Question</th>
+                      <th className="p-2.5 font-bold uppercase w-1/3">Your Deduction</th>
+                      <th className="p-2.5 font-bold uppercase w-1/3">Official Solution</th>
+                      <th className="p-2.5 font-bold uppercase text-center w-20">Result</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-black">
                     {caseData?.questions?.map((q: any) => {
                       const userChoice = submission.answers?.[q.id];
+                      // answerKey is returned by /api/submissions only when host has revealed answers
                       const answerKey = subRes?.answerKey;
-                      const masterAns = answerKey?.[q.id] || q.correctOption;
+                      const masterAns = answerKey?.[q.id];
 
                       const clean = (s?: string) => s?.trim().toLowerCase().replace(/[\s\-_:'"]/g, "") || "";
                       const isCorrect = userChoice && masterAns ? clean(userChoice) === clean(masterAns) : false;
@@ -222,14 +223,20 @@ function SubmittedContent() {
                           <td className="p-2.5 font-bold uppercase text-black">{q.label}</td>
                           <td className="p-2.5 text-black">{userChoice || "—"}</td>
                           <td className="p-2.5 text-[#6b7280]">{masterAns || "—"}</td>
-                          <td className="p-2.5 text-right font-bold uppercase">
-                            {isCorrect ? (
-                              <span className="px-1.5 py-0.5 border border-black bg-[#A30B37] text-white">
-                                ✓ CORRECT
-                              </span>
+                          <td className="p-2.5 text-center">
+                            {masterAns ? (
+                              isCorrect ? (
+                                <span className="inline-block whitespace-nowrap px-2 py-1 border-2 border-black bg-[#A30B37] text-white text-[10px] font-black uppercase tracking-wide">
+                                  CORRECT
+                                </span>
+                              ) : (
+                                <span className="inline-block whitespace-nowrap px-2 py-1 border-2 border-black bg-[#f5f5f5] text-[#6b7280] text-[10px] font-black uppercase tracking-wide">
+                                  WRONG
+                                </span>
+                              )
                             ) : (
-                              <span className="px-1.5 py-0.5 border border-black bg-[#f5f5f5] text-[#6b7280]">
-                                ✗ WRONG
+                              <span className="inline-block whitespace-nowrap px-2 py-1 border-2 border-black bg-[#f5f5f5] text-[#6b7280] text-[10px] font-black uppercase">
+                                —
                               </span>
                             )}
                           </td>
