@@ -159,15 +159,20 @@ export default function AdminPage() {
 
   const handleExportCSV = () => {
     if (!submissions.length) return;
-    let csv = "Rank,Team Name,Assigned Case,Status,Score,Correct,Time (s)\n";
+    // Add UTF-8 BOM so Excel opens team names and scores with proper formatting
+    let content = "\uFEFF";
+    content += "Rank,Team Name,Points Earned,Correct Answers,Time Taken (s),Assigned Case,Status\n";
     submissions.forEach((s: any, idx: number) => {
-      csv += `${idx + 1},"${s.teamName}","${s.caseId || ""}","${s.isSubmitted ? "Submitted" : s.teamStatus || "Active"}",${s.score || 0},${s.breakdown?.correctCount || 0},${s.timeTakenSeconds || 0}\n`;
+      const team = (s.teamName || "").replace(/"/g, '""');
+      const caseTitle = (s.caseId || "").replace(/-/g, " ").replace(/"/g, '""');
+      const status = s.isSubmitted ? "Sealed" : (s.teamStatus || "Active");
+      content += `${idx + 1},"${team}",${s.score || 0},"${s.breakdown?.correctCount || 0}/3",${s.timeTakenSeconds || 0},"${caseTitle}","${status}"\n`;
     });
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([content], { type: "application/vnd.ms-excel;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `Murdle_Results_${Date.now()}.csv`);
+    link.setAttribute("download", `AIMurdle_Leaderboard_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -326,7 +331,7 @@ export default function AdminPage() {
             className="flex items-center space-x-1.5 px-3 py-1.5 bg-white border-2 border-black text-xs font-bold uppercase hover:bg-[#fff5e2] transition shadow-[2px_2px_0px_#000]"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>EXPORT CSV</span>
+            <span>EXPORT EXCEL SHEET</span>
           </button>
         </div>
       </header>
@@ -564,10 +569,17 @@ export default function AdminPage() {
               </h2>
               <p className="text-[10px] text-[#6b7280] uppercase mt-0.5">Auto-refreshes every 2 seconds</p>
             </div>
-            <div className="flex items-center gap-4 text-xs font-bold uppercase">
+            <div className="flex items-center gap-3 text-xs font-bold uppercase flex-wrap">
               <span>{submissions.length} <span className="text-[#6b7280]">Registered</span></span>
               <span className="text-[#A30B37]">{submittedCount} <span className="text-[#6b7280]">Submitted</span></span>
               <span>{activeCount} <span className="text-[#6b7280]">Active</span></span>
+              <button
+                onClick={handleExportCSV}
+                className="ml-2 flex items-center space-x-1.5 px-3 py-1 bg-[#fff5e2] hover:bg-black hover:text-white border-2 border-black text-[11px] font-black uppercase transition shadow-[2px_2px_0px_#000]"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>EXPORT EXCEL SHEET</span>
+              </button>
             </div>
           </div>
 
