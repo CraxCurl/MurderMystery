@@ -1,14 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase, getInMemoryStore } from "@/lib/mongodb";
 import Submission from "@/models/Submission";
+import GameConfig from "@/models/GameConfig";
 import path from "path";
 import fs from "fs/promises";
 
+// Helper to normalize strings for robust answer comparison
+function normalizeString(str?: string): string {
+  if (!str) return "";
+  return str.trim().toLowerCase().replace(/[\s\-_:'"]/g, "");
+}
+
 // Helper to load master case file
 async function loadMasterCase(caseId: string = "ghost-in-the-model") {
-  const filePath = path.join(process.cwd(), "data", "cases", `${caseId}.json`);
-  const content = await fs.readFile(filePath, "utf-8");
-  return JSON.parse(content);
+  try {
+    const filePath = path.join(process.cwd(), "data", "cases", `${caseId}.json`);
+    const content = await fs.readFile(filePath, "utf-8");
+    return JSON.parse(content);
+  } catch {
+    const fallbackPath = path.join(process.cwd(), "data", "cases", "ghost-in-the-model.json");
+    const content = await fs.readFile(fallbackPath, "utf-8");
+    return JSON.parse(content);
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -21,22 +34,31 @@ export async function GET(request: NextRequest) {
     }
 
     const { isConnected } = await connectToDatabase();
+    let submission: any = null;
+    let isRevealed = false;
 
     if (isConnected) {
-      const submission = await Submission.findOne({ teamName: teamName.trim() });
-      if (!submission) {
-        return NextResponse.json({ success: false, error: "Team not found" }, { status: 404 });
-      }
-      return NextResponse.json({ success: true, submission });
+      submission = await Submission.findOne({ teamName: teamName.trim() });
+      const config = await GameConfig.findOne();
+      isRevealed = Boolean(config?.answerKeyRevealed);
+    } else {
+      const memory = getInMemoryStore();
+      submission = memory.submissions.get(teamName.trim().toLowerCase());
+      isRevealed = Boolean(memory.config.answerKeyRevealed);
     }
 
-    // Fallback in-memory
-    const memory = getInMemoryStore();
-    const submission = memory.submissions.get(teamName.trim().toLowerCase());
     if (!submission) {
       return NextResponse.json({ success: false, error: "Team not found" }, { status: 404 });
     }
-    return NextResponse.json({ success: true, submission });
+
+    // Attach answer key if revealed by host command
+    let answerKey: Record<string, string> | null = null;
+    if (isRevealed) {
+      const masterCase = await loadMasterCase(submission.caseId || "ghost-in-the-model");
+      answerKey = masterCase.answerKey || null;
+    }
+
+    return NextResponse.json({ success: true, submission, answerKey });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
@@ -108,7 +130,7 @@ export async function POST(request: NextRequest) {
       questions.forEach((q) => {
         const teamAnswer = answers[q.id];
         const correctAnswer = answerKey[q.id];
-        if (teamAnswer && correctAnswer && teamAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()) {
+        if (teamAnswer && correctAnswer && normalizeString(teamAnswer) === normalizeString(correctAnswer)) {
           correctCount++;
           basePoints += q.points || 250;
         }
@@ -158,7 +180,7 @@ export async function POST(request: NextRequest) {
           submission = {
             teamName: trimmedTeam,
             caseId,
-            squadBadge: squadBadge || "🔍",
+            squadBadge: squadBadge || "search",
             answers: {},
             score: 0,
             breakdown: { correctCount: 0, totalQuestions: 4, basePoints: 0, timeBonus: 0 },

@@ -155,9 +155,11 @@ function SubmittedContent() {
                 <div className="space-y-3">
                   {caseData.questions.map((q: any) => {
                     const teamAns = submission.answers?.[q.id];
-                    // Fetch master answer key from local data if available
-                    const masterAns = caseData.answerKey?.[q.id] || "Dr. Aris Thorne"; // fallback for public endpoint
-                    const isCorrect = teamAns && masterAns && teamAns.trim().toLowerCase() === masterAns.trim().toLowerCase();
+                    const answerKey = subRes?.answerKey;
+                    const masterAns = answerKey?.[q.id];
+
+                    const clean = (s?: string) => s?.trim().toLowerCase().replace(/[\s\-_:'"]/g, "") || "";
+                    const isCorrect = teamAns && masterAns && clean(teamAns) === clean(masterAns);
 
                     return (
                       <div
@@ -188,6 +190,12 @@ function SubmittedContent() {
                               {teamAns || "No selection"}
                             </span>
                           </div>
+                          {masterAns && !isCorrect && (
+                            <div>
+                              <span className="text-slate-500 uppercase font-semibold">Official Solution: </span>
+                              <span className="text-cyber-cyan font-bold">{masterAns}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
