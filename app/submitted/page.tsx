@@ -13,6 +13,7 @@ import {
   FolderLock,
   FileCheck,
   Check,
+  Trophy,
 } from "lucide-react";
 import SquadIconDisplay from "@/components/SquadIconDisplay";
 
@@ -84,13 +85,100 @@ function SubmittedContent() {
     }
   }, [config?.answerKeyRevealed, hasTriggeredConfetti]);
 
-  if (!submission) {
+  const handleRegisterNewSquad = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("aimurdle_team_name");
+      localStorage.removeItem("aimurdle_current_token");
+      localStorage.removeItem("aimurdle_squad_badge");
+      localStorage.removeItem("aimurdle_case_id");
+    }
+    router.push("/");
+  };
+
+  const isRemovedOrMissing = !submission || subRes?.isRemoved;
+  const leaderboardList = subRes?.leaderboard || [];
+
+  // ── ENDING / THANKS FOR PLAYING SCREEN (When squad is removed or lobby reset) ──
+  if (isRemovedOrMissing) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-[#fbfbf9] text-black font-mono">
-        <div className="border-2 border-black p-4 bg-[#fff5e2] shadow-[4px_4px_0px_#000000] text-center">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#6b7280] animate-pulse">
-            [ RETRIEVING SQUAD DOCKET... ]
-          </p>
+      <div className="flex-1 flex flex-col items-center justify-center p-4 md:py-8 max-w-[680px] w-[94%] mx-auto font-mono text-black">
+        <div className="w-full bg-white border-[3px] border-black p-5 md:p-8 shadow-[6px_6px_0px_#000000] text-center space-y-6">
+          {/* Header Banner */}
+          <div className="border-b-2 border-black pb-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#A30B37] block mb-1">
+              [ CASE DOSSIER ARCHIVED // INVESTIGATION CONCLUDED ]
+            </span>
+            <h1 className="text-2xl md:text-3xl font-black uppercase text-black">
+              THANKS FOR PLAYING AIMURDLE!
+            </h1>
+            <p className="text-xs text-[#6b7280] uppercase mt-1 leading-relaxed">
+              The investigation round has concluded. Official final scores are tallied below.
+            </p>
+          </div>
+
+          {/* Final Leaderboard Table */}
+          <div className="space-y-3 text-left">
+            <div className="flex justify-between items-center border-b-2 border-black pb-1.5">
+              <h3 className="text-xs font-black uppercase text-black flex items-center space-x-1.5">
+                <Trophy className="w-4 h-4 text-[#A30B37]" />
+                <span>FINAL SQUAD LEADERBOARD</span>
+              </h3>
+              <span className="text-[10px] font-bold text-[#6b7280]">
+                {leaderboardList.length} SQUADS TOTAL
+              </span>
+            </div>
+
+            {leaderboardList.length === 0 ? (
+              <div className="p-6 bg-[#fff5e2] border-2 border-black text-center text-xs font-bold uppercase text-[#6b7280]">
+                Lobby reset by Chief Inspector. Ready for a new investigation round!
+              </div>
+            ) : (
+              <div className="border-2 border-black overflow-x-auto bg-white shadow-[2px_2px_0px_#000]">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b-2 border-black bg-[#f5f5f5] text-black font-bold uppercase">
+                      <th className="p-2.5">Rank</th>
+                      <th className="p-2.5">Squad Name</th>
+                      <th className="p-2.5 text-center">Correct</th>
+                      <th className="p-2.5 text-center">Time</th>
+                      <th className="p-2.5 text-right">Score</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-black">
+                    {leaderboardList.map((item: any, idx: number) => (
+                      <tr key={item.teamName} className={idx === 0 ? "bg-[#fff5e2] font-black" : "hover:bg-[#fbfbf9]"}>
+                        <td className="p-2.5 font-bold">
+                          #{idx + 1}
+                        </td>
+                        <td className="p-2.5 font-bold uppercase text-black">
+                          {item.teamName}
+                        </td>
+                        <td className="p-2.5 text-center font-bold text-[#A30B37]">
+                          {item.breakdown?.correctCount || 0} / 3
+                        </td>
+                        <td className="p-2.5 text-center text-[#6b7280]">
+                          {item.timeTakenSeconds || 0}s
+                        </td>
+                        <td className="p-2.5 text-right font-black text-black">
+                          {item.score || 0} PTS
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Action Button */}
+          <div className="pt-2">
+            <button
+              onClick={handleRegisterNewSquad}
+              className="w-full py-3.5 bg-[#A30B37] hover:bg-[#85082c] text-white border-[3px] border-black text-xs md:text-sm font-black uppercase tracking-widest shadow-[4px_4px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] transition"
+            >
+              [ START NEW INVESTIGATION / LOBBY ]
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -258,7 +346,7 @@ function SubmittedContent() {
               </button>
 
               <button
-                onClick={() => router.push("/")}
+                onClick={handleRegisterNewSquad}
                 className="px-4 py-2 bg-[#A30B37] hover:bg-[#85082c] text-white border-[3px] border-black text-xs font-bold uppercase shadow-[4px_4px_0px_#000000] transition"
               >
                 CASE CLOSED / LOBBY

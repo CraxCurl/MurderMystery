@@ -61,15 +61,45 @@ async function getConfig() {
 const BASE_PER_QUESTION = 250; // 3 questions × 250 = 750 max base
 const MAX_TIME_BONUS = 250;    // 250 time bonus → total cap 1000
 
+// Helper to fetch sorted leaderboard
+async function getLeaderboardList() {
+  const { isConnected } = await connectToDatabase();
+  if (isConnected) {
+    const list = await Submission.find({})
+      .select("teamName caseId squadBadge score breakdown timeTakenSeconds isSubmitted teamStatus joinedAt submittedAt")
+      .sort({ score: -1, timeTakenSeconds: 1, submittedAt: 1 })
+      .lean();
+    return list;
+  }
+  const memory = getInMemoryStore();
+  return Array.from(memory.submissions.values()).sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if (a.timeTakenSeconds !== b.timeTakenSeconds) return a.timeTakenSeconds - b.timeTakenSeconds;
+    return new Date(a.joinedAt).getTime() - new Date(b.joinedAt).getTime();
+  });
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = getSquadSessionFromReq(request);
     const { searchParams } = new URL(request.url);
     const teamName = searchParams.get("teamName") || session?.teamName;
     const teamToken = searchParams.get("teamToken") || request.headers.get("x-team-token") || session?.teamToken;
+    const isPublicLeaderboardRequest = searchParams.get("leaderboard") === "true";
+
+    const leaderboard = await getLeaderboardList();
+
+    if (isPublicLeaderboardRequest) {
+      return NextResponse.json({ success: true, leaderboard });
+    }
 
     if (!teamName) {
-      return NextResponse.json({ success: false, error: "No active squad session found." }, { status: 400 });
+      return NextResponse.json({
+        success: false,
+        isRemoved: true,
+        leaderboard,
+        error: "No active squad session found.",
+      }, { status: 200 });
     }
 
     const trimmedTeam = teamName.trim();
@@ -78,7 +108,12 @@ export async function GET(request: NextRequest) {
     if (isConnected) {
       const submission = await Submission.findOne({ teamName: new RegExp(`^${trimmedTeam}$`, "i") });
       if (!submission) {
-        return NextResponse.json({ success: false, error: "Squad not found." }, { status: 404 });
+        return NextResponse.json({
+          success: false,
+          isRemoved: true,
+          leaderboard,
+          error: "Squad docket not found or reset by host.",
+        }, { status: 200 });
       }
 
       if (teamToken && submission.teamToken !== teamToken) {
@@ -87,8 +122,6 @@ export async function GET(request: NextRequest) {
 
       const config = await getConfig();
       const caseData = await loadCase(submission.caseId || "ghost-in-the-model");
-
-      // Only expose the answer key to the client after the host has revealed it
       const answerKey = config.answerKeyRevealed ? (caseData.answerKey || {}) : undefined;
 
       return NextResponse.json({
@@ -99,6 +132,7 @@ export async function GET(request: NextRequest) {
         timerDurationMinutes: config.timerDurationMinutes,
         caseData,
         answerKey,
+        leaderboard,
         serverTime: new Date().toISOString(),
       });
     }
@@ -107,7 +141,12 @@ export async function GET(request: NextRequest) {
     const memory = getInMemoryStore();
     const submission = memory.submissions.get(trimmedTeam.toLowerCase());
     if (!submission) {
-      return NextResponse.json({ success: false, error: "Squad not found." }, { status: 404 });
+      return NextResponse.json({
+        success: false,
+        isRemoved: true,
+        leaderboard,
+        error: "Squad docket not found or reset by host.",
+      }, { status: 200 });
     }
     if (teamToken && submission.teamToken !== teamToken) {
       return NextResponse.json({ success: false, error: "Unauthorized: Invalid team token." }, { status: 401 });
@@ -115,8 +154,6 @@ export async function GET(request: NextRequest) {
 
     const cfg = memory.config;
     const caseData = await loadCase(submission.caseId || "ghost-in-the-model");
-
-    // Only expose the answer key to the client after the host has revealed it
     const answerKey = cfg.answerKeyRevealed ? (caseData.answerKey || {}) : undefined;
 
     return NextResponse.json({
@@ -127,6 +164,7 @@ export async function GET(request: NextRequest) {
       timerDurationMinutes: cfg.timerDurationMinutes || 15,
       caseData,
       answerKey,
+      leaderboard,
       serverTime: new Date().toISOString(),
     });
   } catch (error: any) {
