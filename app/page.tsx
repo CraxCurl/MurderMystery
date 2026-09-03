@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { clearLocalSquadSession } from "@/lib/client-session";
 import {
   Shield,
   Play,
@@ -33,6 +34,10 @@ export default function LandingPage() {
         return null;
       })
       .then((data) => {
+        if (data?.isRemoved) {
+          clearLocalSquadSession();
+          return;
+        }
         if (data?.success && data?.submission) {
           if (data.submission.isSubmitted) {
             router.replace("/submitted");
@@ -74,8 +79,9 @@ export default function LandingPage() {
       if (data.success) {
         localStorage.setItem("aimurdle_team_name", trimmed);
         localStorage.setItem("aimurdle_squad_badge", "search");
-        if (data.caseId) {
-          localStorage.setItem("aimurdle_case_id", data.caseId);
+        const assignedCaseId = data.caseId || data.submission?.caseId;
+        if (assignedCaseId) {
+          localStorage.setItem("aimurdle_case_id", assignedCaseId);
         }
         if (data.teamToken) {
           localStorage.setItem(`aimurdle_team_token_${trimmed}`, data.teamToken);

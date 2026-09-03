@@ -2,8 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase, getInMemoryStore } from "@/lib/mongodb";
 import Submission from "@/models/Submission";
 import { verifyAdminAuth } from "@/lib/admin-auth";
+import path from "path";
+import fs from "fs/promises";
 
 export const dynamic = "force-dynamic";
+
+async function loadCase(caseId: string) {
+  const filePath = path.join(process.cwd(), "data", "cases", `${caseId}.json`);
+  return JSON.parse(await fs.readFile(filePath, "utf-8"));
+}
+
+function normalizeAnswer(value?: string) {
+  return (value || "").trim().toLowerCase().replace(/[\s\-_:'"]/g, "");
+}
 
 
 export async function GET(request: NextRequest) {
@@ -92,5 +103,78 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Invalid delete action." }, { status: 400 });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message || "Failed to modify submissions." }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    if (!verifyAdminAuth(request)) {
+      return NextResponse.json({ success: false, error: "Unauthorized. Invalid Admin Access Key." }, { status: 401 });
+    }
+
+    const { action, teamName, caseId } = await request.json();
+    if (!teamName) {
+      return NextResponse.json({ success: false, error: "teamName is required." }, { status: 400 });
+    }
+
+    const { isConnected } = await connectToDatabase();
+    const key = teamName.trim().toLowerCase();
+    const submission: any = isConnected
+      ? await Submission.findOne({ teamName: new RegExp(`^${teamName.trim()}$`, "i") })
+      : getInMemoryStore().submissions.get(key);
+
+    if (!submission) {
+      return NextResponse.json({ success: false, error: "Squad not found." }, { status: 404 });
+    }
+
+    if (action === "assign_case") {
+      if (!caseId || typeof caseId !== "string") {
+        return NextResponse.json({ success: false, error: "A valid caseId is required." }, { status: 400 });
+      }
+      if (submission.teamStatus !== "waiting" || submission.isSubmitted) {
+        return NextResponse.json({ success: false, error: "A case can only be changed while the squad is waiting for the round to start." }, { status: 409 });
+      }
+      try {
+        await loadCase(caseId);
+      } catch {
+        return NextResponse.json({ success: false, error: "Selected case file does not exist." }, { status: 404 });
+      }
+      submission.caseId = caseId;
+      if (isConnected) await submission.save();
+      else getInMemoryStore().submissions.set(key, submission);
+      return NextResponse.json({ success: true, message: "Assigned case updated." });
+    }
+
+    if (action === "answer_review") {
+      const caseData = await loadCase(submission.caseId || "ghost-in-the-model");
+      const answers = submission.answers instanceof Map
+        ? Object.fromEntries(submission.answers)
+        : submission.answers || {};
+      const questions = (caseData.questions || []).map((question: any) => {
+        const submittedAnswer = answers[question.id] || "—";
+        const correctAnswer = caseData.answerKey?.[question.id] || "—";
+        return {
+          id: question.id,
+          label: question.label,
+          question: question.question,
+          submittedAnswer,
+          correctAnswer,
+          isCorrect: submittedAnswer !== "—" && normalizeAnswer(submittedAnswer) === normalizeAnswer(correctAnswer),
+        };
+      });
+      return NextResponse.json({
+        success: true,
+        review: {
+          teamName: submission.teamName,
+          caseTitle: caseData.title || submission.caseId,
+          isSubmitted: submission.isSubmitted,
+          questions,
+        },
+      });
+    }
+
+    return NextResponse.json({ success: false, error: "Invalid action." }, { status: 400 });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message || "Failed to update squad." }, { status: 500 });
   }
 }

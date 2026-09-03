@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 
 import SquadIconDisplay from "@/components/SquadIconDisplay";
+import { clearLocalSquadSession } from "@/lib/client-session";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -89,9 +90,9 @@ function GameContent() {
   };
 
   // SWR Hooks with security headers
-  const fetcherWithAuth = (url: string) =>
+  const fetcherWithAuth = (url: string, token: string) =>
     fetch(url, {
-      headers: teamToken ? { "x-team-token": teamToken } : {},
+      headers: { "x-team-token": token },
     }).then((res) => {
       if (res.status === 401) {
         throw new Error("UNAUTHORIZED_SQUAD_ACCESS");
@@ -102,15 +103,22 @@ function GameContent() {
   const { data: caseRes } = useSWR("/api/cases/ghost-in-the-model", fetcher);
   const { data: configRes } = useSWR("/api/config", fetcher, { refreshInterval: 2000 });
   const { data: teamSubRes, error: teamSubError } = useSWR(
-    "/api/submissions",
-    fetcherWithAuth,
+    teamToken ? ["/api/submissions", teamToken] : null,
+    ([url, token]: [string, string]) => fetcherWithAuth(url, token),
     { refreshInterval: 2000 }
   );
 
   const caseData = teamSubRes?.caseData || caseRes?.case;
   const gameConfig = configRes?.config;
   const teamSubmission = teamSubRes?.submission;
-  const roundStatus = teamSubRes?.roundStatus || gameConfig?.roundStatus || "waiting";
+  const globalRoundStatus = teamSubRes?.roundStatus || gameConfig?.roundStatus || "waiting";
+  // A newly registered squad must remain in the lobby, even when the previous
+  // round is still displayed as ended for its existing participants.
+  const roundStatus = teamSubmission?.teamStatus === "waiting"
+    ? "waiting"
+    : teamSubmission?.teamStatus === "ended"
+      ? "ended"
+      : globalRoundStatus;
   const roundStartedAt = teamSubRes?.roundStartedAt || gameConfig?.roundStartedAt;
 
   // Sync team metadata from submission response
@@ -124,6 +132,15 @@ function GameContent() {
     }
   }, [teamSubmission, router]);
 
+  // A host reset deletes this squad server-side. Clear the now-invalid local
+  // session and make the player register a fresh team name.
+  useEffect(() => {
+    if (teamSubRes?.isRemoved) {
+      clearLocalSquadSession();
+      router.replace("/");
+    }
+  }, [teamSubRes?.isRemoved, router]);
+
   // Handle unauthorized access attempt
   useEffect(() => {
     if (teamSubError && teamSubError.message === "UNAUTHORIZED_SQUAD_ACCESS") {
@@ -133,13 +150,6 @@ function GameContent() {
       }, 3000);
     }
   }, [teamSubError, router]);
-
-  // Redirect if round is ended
-  useEffect(() => {
-    if (roundStatus === "ended") {
-      router.replace("/submitted");
-    }
-  }, [roundStatus, router]);
 
   // Server-Synced Timer Calculation
   const [timeLeftSeconds, setTimeLeftSeconds] = useState<number>(900);

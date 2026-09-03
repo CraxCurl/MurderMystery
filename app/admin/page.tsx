@@ -42,6 +42,8 @@ export default function AdminPage() {
   const [isEndAllModalOpen, setIsEndAllModalOpen] = useState(false);
   const [customDuration, setCustomDuration] = useState("15");
   const [roundName, setRoundName] = useState("");
+  const [answerReview, setAnswerReview] = useState<any>(null);
+  const [reviewError, setReviewError] = useState("");
 
   useEffect(() => {
     const saved = localStorage.getItem("aimurdle_admin_pass") || "admin123";
@@ -84,8 +86,14 @@ export default function AdminPage() {
     { refreshInterval: 2000 }
   );
 
+  const { data: casesData } = useSWR(
+    isAuthenticated ? ["/api/admin/cases", adminPassword] : null,
+    ([url, pass]: [string, string]) => fetcher(url, pass)
+  );
+
   const submissions = subData?.submissions || [];
   const config = configData?.config;
+  const availableCases: Array<{ id: string; title: string }> = casesData?.cases || [];
 
   // Sync round name from config
   useEffect(() => {
@@ -125,6 +133,38 @@ export default function AdminPage() {
       mutate("/api/config");
     } catch (e) {
       console.error("Submission action failed:", e);
+    }
+  };
+
+  const sendSubUpdate = async (payload: any) => {
+    const response = await fetch("/api/admin/submissions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-password": adminPassword,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (data.success) {
+      mutate(["/api/admin/submissions", adminPassword]);
+    }
+    return data;
+  };
+
+  const openAnswerReview = async (teamName: string) => {
+    setReviewError("");
+    setAnswerReview({ teamName, loading: true });
+    try {
+      const data = await sendSubUpdate({ action: "answer_review", teamName });
+      if (data.success) setAnswerReview(data.review);
+      else {
+        setAnswerReview(null);
+        setReviewError(data.error || "Unable to load this squad's answers.");
+      }
+    } catch {
+      setAnswerReview(null);
+      setReviewError("Unable to load this squad's answers.");
     }
   };
 
@@ -413,13 +453,19 @@ export default function AdminPage() {
               )}
 
               {roundStatus === "ended" && (
-                <button
-                  onClick={() => sendConfigAction({ action: "start_round" })}
-                  className="w-full py-3 bg-[#A30B37] hover:bg-[#85082c] text-white border-[3px] border-black text-sm font-black uppercase flex items-center justify-center gap-2 shadow-[3px_3px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition"
-                >
-                  <Play className="w-4 h-4" />
-                  RESTART ROUND
-                </button>
+                <div className="space-y-2">
+                  <p className="border-2 border-black bg-[#f5f5f5] p-3 text-center text-xs font-bold uppercase text-[#6b7280]">
+                    Round ended — final leaderboard is now visible to squads.
+                  </p>
+                  <button
+                    onClick={() => sendConfigAction({ action: "reset_round" })}
+                    className="w-full py-3 bg-[#A30B37] hover:bg-[#85082c] text-white border-[3px] border-black text-sm font-black uppercase flex items-center justify-center gap-2 shadow-[3px_3px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition"
+                    title="Clear all teams and prepare the waiting lobby for a new round"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    START NEW ROUND
+                  </button>
+                </div>
               )}
 
               {/* Secondary Controls */}
@@ -443,10 +489,10 @@ export default function AdminPage() {
                 <button
                   onClick={() => sendConfigAction({ action: "reset_round" })}
                   className="py-2 border-2 border-black bg-white hover:bg-[#fff5e2] text-xs font-bold uppercase flex items-center justify-center gap-1 shadow-[2px_2px_0px_#000]"
-                  title="Reset lobby — clears all teams"
+                  title="Start a fresh round — clears all teams and scores"
                 >
                   <RotateCcw className="w-3 h-3" />
-                  RESET
+                  RESET LOBBY
                 </button>
               </div>
 
@@ -557,16 +603,36 @@ export default function AdminPage() {
                         </td>
 
                         <td className="p-3">
-                          <div className="flex items-center gap-2 font-bold uppercase">
+                          <button
+                            onClick={() => openAnswerReview(s.teamName)}
+                            className="flex items-center gap-2 font-bold uppercase text-left hover:text-[#A30B37]"
+                            title="Review this squad's answers"
+                          >
                             <div className="w-6 h-6 border border-black bg-[#fff5e2] flex items-center justify-center flex-shrink-0">
                               <SquadIconDisplay iconId={s.squadBadge || "search"} className="w-3.5 h-3.5" />
                             </div>
-                            <span className="truncate max-w-[120px]">{s.teamName}</span>
-                          </div>
+                            <span className="truncate max-w-[120px] underline decoration-dotted underline-offset-2">{s.teamName}</span>
+                          </button>
                         </td>
 
-                        <td className="p-3 text-[#A30B37] font-bold uppercase text-[10px]">
-                          {s.caseId ? s.caseId.replace(/-/g, " ") : "—"}
+                        <td className="p-3">
+                          <select
+                            value={s.caseId || ""}
+                            disabled={status !== "waiting" || s.isSubmitted}
+                            onChange={async (event) => {
+                              const result = await sendSubUpdate({ action: "assign_case", teamName: s.teamName, caseId: event.target.value });
+                              if (!result.success) setReviewError(result.error || "Unable to update assigned case.");
+                            }}
+                            className="w-full min-w-[150px] border-2 border-black bg-white px-2 py-1 text-[10px] font-bold uppercase text-[#A30B37] outline-none disabled:cursor-not-allowed disabled:bg-[#f5f5f5] disabled:text-[#6b7280]"
+                            title={status === "waiting" && !s.isSubmitted ? "Choose a case for this waiting squad" : "Cases can only be changed before the round starts"}
+                          >
+                            {availableCases.map((caseFile) => (
+                              <option key={caseFile.id} value={caseFile.id}>{caseFile.title}</option>
+                            ))}
+                            {!availableCases.some((caseFile) => caseFile.id === s.caseId) && (
+                              <option value={s.caseId}>{s.caseId?.replace(/-/g, " ") || "—"}</option>
+                            )}
+                          </select>
                         </td>
 
                         <td className="p-3 text-center">
@@ -637,6 +703,59 @@ export default function AdminPage() {
           )}
         </div>
       </div>
+
+      {reviewError && (
+        <div className="fixed bottom-4 right-4 z-50 max-w-sm border-2 border-black bg-[#fff5e2] p-3 text-xs font-bold text-[#A30B37] shadow-[4px_4px_0px_#000]">
+          {reviewError}
+        </div>
+      )}
+
+      {answerReview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-2xl max-h-[85vh] overflow-y-auto bg-white border-[3px] border-black p-5 shadow-[6px_6px_0px_#000]">
+            <div className="flex items-start justify-between gap-4 border-b-2 border-black pb-3 mb-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase text-[#A30B37]">[ Squad answer review ]</p>
+                <h2 className="text-base font-black uppercase">{answerReview.teamName}</h2>
+                {!answerReview.loading && <p className="text-[10px] font-bold uppercase text-[#6b7280]">{answerReview.caseTitle}</p>}
+              </div>
+              <button
+                onClick={() => setAnswerReview(null)}
+                className="w-7 h-7 border-2 border-black bg-white hover:bg-black hover:text-white font-bold text-xs shadow-[2px_2px_0px_#000]"
+                title="Close answer review"
+              >
+                ✕
+              </button>
+            </div>
+            {answerReview.loading ? (
+              <p className="py-8 text-center text-xs font-bold uppercase animate-pulse">Loading squad answers...</p>
+            ) : (
+              <div className="space-y-3">
+                {!answerReview.isSubmitted && (
+                  <p className="border-2 border-black bg-[#fff5e2] p-3 text-xs font-bold uppercase">
+                    This squad has not submitted yet. Correct answers are shown for host review only.
+                  </p>
+                )}
+                {answerReview.questions.map((question: any) => (
+                  <div key={question.id} className="border-2 border-black p-3 text-xs space-y-2">
+                    <p className="font-black uppercase">{question.label}</p>
+                    <p className="text-[#6b7280]">{question.question}</p>
+                    <div className="grid gap-2 md:grid-cols-2">
+                      <p><span className="font-bold uppercase">Squad answer:</span> {question.submittedAnswer}</p>
+                      <p><span className="font-bold uppercase">Correct answer:</span> {question.correctAnswer}</p>
+                    </div>
+                    {answerReview.isSubmitted && (
+                      <span className={`inline-block border-2 border-black px-2 py-1 text-[10px] font-black uppercase ${question.isCorrect ? "bg-[#A30B37] text-white" : "bg-[#f5f5f5] text-[#6b7280]"}`}>
+                        {question.isCorrect ? "Correct" : "Wrong"}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── WIPE CONFIRMATION MODAL ──────────────────────────────────────── */}
       {isWipeModalOpen && (

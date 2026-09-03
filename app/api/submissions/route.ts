@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase, getInMemoryStore } from "@/lib/mongodb";
 import Submission from "@/models/Submission";
 import GameConfig from "@/models/GameConfig";
-import { getSquadSessionFromReq, setSquadSessionCookie } from "@/lib/session";
+import { clearSquadSessionCookie, getSquadSessionFromReq, setSquadSessionCookie } from "@/lib/session";
 import path from "path";
 import fs from "fs/promises";
 import crypto from "crypto";
@@ -38,6 +38,11 @@ async function loadCase(caseId: string = "ghost-in-the-model") {
     const content = await fs.readFile(defaultPath, "utf-8");
     return JSON.parse(content);
   }
+}
+
+function withoutAnswerKey(caseData: Record<string, unknown>) {
+  const { answerKey: _answerKey, ...publicCaseData } = caseData;
+  return publicCaseData;
 }
 
 // Get or create global game config
@@ -90,6 +95,14 @@ export async function GET(request: NextRequest) {
     const leaderboard = await getLeaderboardList();
 
     if (isPublicLeaderboardRequest) {
+      const { isConnected } = await connectToDatabase();
+      const config = isConnected ? await getConfig() : getInMemoryStore().config;
+      if (config.roundStatus !== "ended") {
+        return NextResponse.json(
+          { success: false, error: "Leaderboard is available after the host ends the round." },
+          { status: 409 }
+        );
+      }
       return NextResponse.json({ success: true, leaderboard });
     }
 
@@ -108,12 +121,14 @@ export async function GET(request: NextRequest) {
     if (isConnected) {
       const submission = await Submission.findOne({ teamName: new RegExp(`^${trimmedTeam}$`, "i") });
       if (!submission) {
-        return NextResponse.json({
+        const response = NextResponse.json({
           success: false,
           isRemoved: true,
           leaderboard,
           error: "Squad docket not found or reset by host.",
         }, { status: 200 });
+        clearSquadSessionCookie(response);
+        return response;
       }
 
       if (teamToken && submission.teamToken !== teamToken) {
@@ -130,7 +145,7 @@ export async function GET(request: NextRequest) {
         roundStatus: config.roundStatus,
         roundStartedAt: config.roundStartedAt,
         timerDurationMinutes: config.timerDurationMinutes,
-        caseData,
+        caseData: withoutAnswerKey(caseData),
         answerKey,
         leaderboard,
         serverTime: new Date().toISOString(),
@@ -141,12 +156,14 @@ export async function GET(request: NextRequest) {
     const memory = getInMemoryStore();
     const submission = memory.submissions.get(trimmedTeam.toLowerCase());
     if (!submission) {
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: false,
         isRemoved: true,
         leaderboard,
         error: "Squad docket not found or reset by host.",
       }, { status: 200 });
+      clearSquadSessionCookie(response);
+      return response;
     }
     if (teamToken && submission.teamToken !== teamToken) {
       return NextResponse.json({ success: false, error: "Unauthorized: Invalid team token." }, { status: 401 });
@@ -162,7 +179,7 @@ export async function GET(request: NextRequest) {
       roundStatus: cfg.roundStatus || "waiting",
       roundStartedAt: cfg.roundStartedAt || null,
       timerDurationMinutes: cfg.timerDurationMinutes || 15,
-      caseData,
+      caseData: withoutAnswerKey(caseData),
       answerKey,
       leaderboard,
       serverTime: new Date().toISOString(),
@@ -343,6 +360,12 @@ export async function POST(request: NextRequest) {
         if (submission.teamToken !== teamToken) return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
 
         const config = await getConfig();
+        if (config.roundStatus !== "active" || submission.teamStatus !== "active") {
+          return NextResponse.json(
+            { success: false, error: "The host has not started this round, or it has already ended." },
+            { status: 409 }
+          );
+        }
         const caseData = await loadCase(submission.caseId || "ghost-in-the-model");
         const questions: Array<{ id: string }> = caseData.questions || [];
         const answerKey: Record<string, string> = caseData.answerKey || {};
@@ -381,6 +404,12 @@ export async function POST(request: NextRequest) {
         if (submission.teamToken !== teamToken) return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
 
         const cfg = memory.config;
+        if (cfg.roundStatus !== "active" || submission.teamStatus !== "active") {
+          return NextResponse.json(
+            { success: false, error: "The host has not started this round, or it has already ended." },
+            { status: 409 }
+          );
+        }
         const caseData = await loadCase(submission.caseId || "ghost-in-the-model");
         const questions: Array<{ id: string }> = caseData.questions || [];
         const answerKey: Record<string, string> = caseData.answerKey || {};
