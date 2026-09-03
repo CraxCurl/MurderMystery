@@ -668,11 +668,21 @@ export default function AdminPage() {
 
                         <td className="p-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
+                            {/* Move Team back to Main Menu / Registration */}
+                            <button
+                              onClick={() => sendSubAction({ action: "delete_team", teamName: s.teamName })}
+                              className="px-2.5 py-1 border-2 border-black bg-[#fff5e2] hover:bg-black hover:text-white font-bold text-[10px] uppercase shadow-[1px_1px_0px_#000] flex items-center gap-1 whitespace-nowrap transition"
+                              title="Reset team & move back to main menu registration screen"
+                            >
+                              <RotateCcw className="w-3 h-3 text-[#A30B37]" />
+                              <span>MAIN MENU</span>
+                            </button>
+
                             {/* Force End (only for non-finished active teams) */}
                             {!isFinished && status !== "ended" && (
                               <button
                                 onClick={() => sendSubAction({ action: "force_submit", teamName: s.teamName })}
-                                className="px-2 py-1 border-2 border-black bg-[#fff5e2] hover:bg-[#A30B37] hover:text-white font-bold text-[10px] uppercase shadow-[1px_1px_0px_#000] whitespace-nowrap transition"
+                                className="px-2 py-1 border-2 border-black bg-white hover:bg-[#A30B37] hover:text-white font-bold text-[10px] uppercase shadow-[1px_1px_0px_#000] whitespace-nowrap transition"
                                 title="Force end this team's round"
                               >
                                 FORCE END
@@ -683,7 +693,7 @@ export default function AdminPage() {
                             <button
                               onClick={() => sendSubAction({ action: "delete_team", teamName: s.teamName })}
                               className="px-2 py-1 border-2 border-black bg-white hover:bg-[#A30B37] hover:text-white font-bold text-[10px] uppercase shadow-[1px_1px_0px_#000] transition"
-                              title="Remove this team from roster"
+                              title="Delete team completely"
                             >
                               <Trash2 className="w-3 h-3" />
                             </button>

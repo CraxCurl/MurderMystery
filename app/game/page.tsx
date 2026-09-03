@@ -134,6 +134,19 @@ function GameContent() {
     }
   }, [teamSubError, router]);
 
+  // Handle team session reset by host admin -> Redirect to main menu registration
+  useEffect(() => {
+    if (teamSubRes?.isRemoved) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("aimurdle_team_name");
+        localStorage.removeItem("aimurdle_current_token");
+        localStorage.removeItem("aimurdle_squad_badge");
+        localStorage.removeItem("aimurdle_case_id");
+      }
+      router.replace("/");
+    }
+  }, [teamSubRes?.isRemoved, router]);
+
   // Redirect if round is ended
   useEffect(() => {
     if (roundStatus === "ended") {
