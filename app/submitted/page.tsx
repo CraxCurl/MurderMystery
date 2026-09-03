@@ -193,7 +193,7 @@ function SubmittedContent() {
     );
   }
 
-  const isRevealed = Boolean(config?.answerKeyRevealed);
+  const isRevealed = Boolean(config?.answerKeyRevealed || subRes?.roundStatus === "ended");
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-4 md:py-8 max-w-[640px] w-[94%] mx-auto font-mono text-black">

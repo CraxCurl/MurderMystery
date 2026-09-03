@@ -6,7 +6,6 @@ import { verifyAdminAuth } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
-
 export async function POST(request: NextRequest) {
   try {
     if (!verifyAdminAuth(request)) {
@@ -14,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { action, durationMinutes, roundName, teamName } = body;
+    const { action, durationMinutes, roundName, teamName, adjustSeconds } = body;
 
     const { isConnected } = await connectToDatabase();
 
@@ -35,40 +34,35 @@ export async function POST(request: NextRequest) {
       const now = new Date();
 
       if (action === "start_round") {
-        // Start the round: set all waiting teams to active
         config.roundStatus = "active";
         config.roundStartedAt = now;
+        config.answerKeyRevealed = false;
         await Submission.updateMany({ teamStatus: "waiting" }, { $set: { teamStatus: "active" } });
 
       } else if (action === "end_round") {
-        // End all active teams
         config.roundStatus = "ended";
+        config.answerKeyRevealed = true; // Auto-reveal answers on round end
         await Submission.updateMany(
           { teamStatus: { $in: ["waiting", "active"] } },
           { $set: { teamStatus: "ended" } }
         );
 
       } else if (action === "reset_round") {
-        // Wipe all submissions and reset to waiting
         config.roundStatus = "waiting";
         config.roundStartedAt = null;
         config.answerKeyRevealed = false;
         await Submission.deleteMany({});
 
-      } else if (action === "end_team") {
-        // End a specific team early
-        if (!teamName) return NextResponse.json({ success: false, error: "teamName required for end_team" }, { status: 400 });
-        await Submission.findOneAndUpdate(
-          { teamName: new RegExp(`^${teamName.trim()}$`, "i") },
-          { $set: { teamStatus: "ended" } }
-        );
+      } else if (action === "adjust_time") {
+        const secs = Number(adjustSeconds) || 0;
+        if (config.roundStartedAt) {
+          const currentMs = new Date(config.roundStartedAt).getTime();
+          config.roundStartedAt = new Date(currentMs + secs * 1000);
+        }
 
       } else if (action === "set_duration") {
         const newMinutes = Number(durationMinutes) || 15;
         config.timerDurationMinutes = newMinutes;
-
-      } else if (action === "toggle_reveal") {
-        config.answerKeyRevealed = !config.answerKeyRevealed;
 
       } else if (action === "update_round_name") {
         config.roundName = roundName || config.roundName;
@@ -86,13 +80,14 @@ export async function POST(request: NextRequest) {
     if (action === "start_round") {
       cfg.roundStatus = "active";
       cfg.roundStartedAt = nowISO;
-      // Mark all waiting in-memory submissions as active
+      cfg.answerKeyRevealed = false;
       memory.submissions.forEach((sub: any) => {
         if (sub.teamStatus === "waiting") sub.teamStatus = "active";
       });
 
     } else if (action === "end_round") {
       cfg.roundStatus = "ended";
+      cfg.answerKeyRevealed = true; // Auto-reveal answers on round end
       memory.submissions.forEach((sub: any) => {
         if (sub.teamStatus === "waiting" || sub.teamStatus === "active") sub.teamStatus = "ended";
       });
@@ -103,17 +98,15 @@ export async function POST(request: NextRequest) {
       cfg.answerKeyRevealed = false;
       memory.submissions.clear();
 
-    } else if (action === "end_team") {
-      if (!teamName) return NextResponse.json({ success: false, error: "teamName required" }, { status: 400 });
-      const key = teamName.trim().toLowerCase();
-      const sub = memory.submissions.get(key);
-      if (sub) sub.teamStatus = "ended";
+    } else if (action === "adjust_time") {
+      const secs = Number(adjustSeconds) || 0;
+      if (cfg.roundStartedAt) {
+        const currentMs = new Date(cfg.roundStartedAt).getTime();
+        cfg.roundStartedAt = new Date(currentMs + secs * 1000).toISOString();
+      }
 
     } else if (action === "set_duration") {
       cfg.timerDurationMinutes = Number(durationMinutes) || 15;
-
-    } else if (action === "toggle_reveal") {
-      cfg.answerKeyRevealed = !cfg.answerKeyRevealed;
 
     } else if (action === "update_round_name") {
       cfg.roundName = roundName || cfg.roundName;

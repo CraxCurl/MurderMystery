@@ -474,68 +474,7 @@ export default function AdminPage() {
           {/* ── CARD 2: SOLUTION & ROUND MANAGEMENT ───────────── */}
           <div className="space-y-4">
 
-            {/* Solution Reveal */}
-            <div className="bg-white border-[3px] border-black shadow-[4px_4px_0px_#000] p-5 space-y-3">
-              <div className="border-b-2 border-black pb-2">
-                <h2 className="text-xs font-black uppercase flex items-center gap-2">
-                  <Eye className="w-3.5 h-3.5" />
-                  SOLUTION KEY REVEAL
-                </h2>
-              </div>
 
-              <p className="text-[11px] text-[#6b7280] leading-relaxed">
-                Unlocking reveals correct answers and final scores on all squad screens simultaneously.
-              </p>
-
-              <button
-                onClick={() => sendConfigAction({ action: "toggle_reveal" })}
-                className={`w-full py-3 font-black text-sm uppercase flex items-center justify-center gap-2 border-[3px] border-black shadow-[3px_3px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition ${
-                  config?.answerKeyRevealed
-                    ? "bg-[#f5f5f5] text-[#6b7280] hover:bg-[#e0e0e0]"
-                    : "bg-[#A30B37] hover:bg-[#85082c] text-white"
-                }`}
-              >
-                {config?.answerKeyRevealed ? (
-                  <>
-                    <EyeOff className="w-4 h-4" />
-                    HIDE SOLUTIONS (CURRENTLY REVEALED)
-                  </>
-                ) : (
-                  <>
-                    <Eye className="w-4 h-4" />
-                    REVEAL SOLUTIONS TO ALL SQUADS
-                  </>
-                )}
-              </button>
-
-              {config?.answerKeyRevealed && (
-                <div className="p-2 bg-[#fff5e2] border-2 border-black text-[10px] font-bold uppercase text-[#A30B37] text-center">
-                  ✓ ANSWER KEY CURRENTLY VISIBLE TO ALL TEAMS
-                </div>
-              )}
-            </div>
-
-            {/* Danger Zone */}
-            <div className="bg-white border-[3px] border-black shadow-[4px_4px_0px_#000] p-5 space-y-3">
-              <div className="border-b-2 border-black pb-2">
-                <h2 className="text-xs font-black uppercase flex items-center gap-2 text-[#A30B37]">
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  DANGER ZONE
-                </h2>
-              </div>
-
-              <button
-                onClick={() => setIsWipeModalOpen(true)}
-                className="w-full py-2.5 bg-white hover:bg-[#A30B37] hover:text-white border-2 border-black font-bold text-xs uppercase flex items-center justify-center gap-2 transition shadow-[2px_2px_0px_#000]"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                WIPE ALL TEAMS & RESET DATA
-              </button>
-
-              <p className="text-[10px] text-[#6b7280] leading-relaxed">
-                Permanently deletes all registered teams and submissions. Use before starting a fresh round.
-              </p>
-            </div>
 
             {/* Round Name Editor */}
             <div className="bg-white border-2 border-black shadow-[3px_3px_0px_#000] p-4 space-y-2">
@@ -668,21 +607,11 @@ export default function AdminPage() {
 
                         <td className="p-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            {/* Move Team back to Main Menu / Registration */}
-                            <button
-                              onClick={() => sendSubAction({ action: "delete_team", teamName: s.teamName })}
-                              className="px-2.5 py-1 border-2 border-black bg-[#fff5e2] hover:bg-black hover:text-white font-bold text-[10px] uppercase shadow-[1px_1px_0px_#000] flex items-center gap-1 whitespace-nowrap transition"
-                              title="Reset team & move back to main menu registration screen"
-                            >
-                              <RotateCcw className="w-3 h-3 text-[#A30B37]" />
-                              <span>MAIN MENU</span>
-                            </button>
-
                             {/* Force End (only for non-finished active teams) */}
                             {!isFinished && status !== "ended" && (
                               <button
                                 onClick={() => sendSubAction({ action: "force_submit", teamName: s.teamName })}
-                                className="px-2 py-1 border-2 border-black bg-white hover:bg-[#A30B37] hover:text-white font-bold text-[10px] uppercase shadow-[1px_1px_0px_#000] whitespace-nowrap transition"
+                                className="px-2 py-1 border-2 border-black bg-[#fff5e2] hover:bg-[#A30B37] hover:text-white font-bold text-[10px] uppercase shadow-[1px_1px_0px_#000] whitespace-nowrap transition"
                                 title="Force end this team's round"
                               >
                                 FORCE END
@@ -693,7 +622,7 @@ export default function AdminPage() {
                             <button
                               onClick={() => sendSubAction({ action: "delete_team", teamName: s.teamName })}
                               className="px-2 py-1 border-2 border-black bg-white hover:bg-[#A30B37] hover:text-white font-bold text-[10px] uppercase shadow-[1px_1px_0px_#000] transition"
-                              title="Delete team completely"
+                              title="Remove this team from roster"
                             >
                               <Trash2 className="w-3 h-3" />
                             </button>
