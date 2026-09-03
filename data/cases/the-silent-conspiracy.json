@@ -1,0 +1,159 @@
+{
+  "id": "the-silent-conspiracy",
+  "title": "The Silent Conspiracy",
+  "subtitle": "Round 3 — AI Chaos Room",
+  "difficulty": "ADVANCED",
+  "timeLimitMinutes": 15,
+  "victim": {
+    "name": "Aarav Mehta",
+    "role": "CEO, DataSphere Innovations",
+    "timeOfDeath": "09:02 AM",
+    "location": "Server Room, 7th Floor"
+  },
+  "summary": "CEO Aarav Mehta was found dead in a locked server room. No signs of break-in. No CCTV footage. Just a shutdown... and a secret worth killing for. Your team must uncover the truth before the company — and the evidence — disappear.",
+  "suspects": [
+    {
+      "id": "suspect_1",
+      "name": "Riya Patel",
+      "role": "CTO",
+      "avatar": "💻",
+      "bio": "Brilliant. Ambitious. Had full admin access to core systems and infrastructure.",
+      "alibi": "Claims she was monitoring network load remotely from her office.",
+      "motive": "Aarav discovered the Orion deal was a front for selling client data to a competitor and threatened to expose it."
+    },
+    {
+      "id": "suspect_2",
+      "name": "Karan Malhotra",
+      "role": "Head of Sales",
+      "avatar": "📈",
+      "bio": "Desperate to close the Orion deal. Huge sales commission on the line.",
+      "alibi": "In a client meeting in Conference Room B.",
+      "motive": "Stood to lose millions in commissions if Aarav blocked the deal."
+    },
+    {
+      "id": "suspect_3",
+      "name": "Meera Iyer",
+      "role": "Legal Head",
+      "avatar": "⚖️",
+      "bio": "Knows the legal risks. Had heated disagreements with Aarav over corporate compliance.",
+      "alibi": "Drafting contracts in her 5th floor office.",
+      "motive": "Feared criminal liability if Aarav went public with data breach allegations."
+    },
+    {
+      "id": "suspect_4",
+      "name": "Devansh Rao",
+      "role": "System Administrator",
+      "avatar": "⚙️",
+      "bio": "Maintains server clusters and access logs. Claims he was offsite during the incident.",
+      "alibi": "Claims offsite maintenance duty at secondary datacenter.",
+      "motive": "Paid off to execute remote log purges."
+    },
+    {
+      "id": "suspect_5",
+      "name": "Vikrant Sethi",
+      "role": "Investor Representative",
+      "avatar": "📊",
+      "bio": "Pressured executive team for early returns. Stood to benefit directly from the Orion deal.",
+      "alibi": "Attending regional board meeting downtown.",
+      "motive": "Needed immediate liquidity from the Orion data transaction."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evd_1",
+      "title": "Unsent Email Draft (Recovered)",
+      "type": "EMAIL",
+      "tag": "Draft Email",
+      "timestamp": "17 June, 11:48 PM",
+      "content": "To: legal@datasphere.com\nSubject: URGENT: Data Breach Concern\n\nIf anything happens to me, check Project Orion. I found inconsistencies in the access logs. Someone is selling our client data. I've locked the proof in an offline backup. Trust no one.\n- Aarav"
+    },
+    {
+      "id": "evd_2",
+      "title": "Internal Chat Snippet (Deleted)",
+      "type": "CHAT",
+      "tag": "Internal Chat",
+      "timestamp": "18 June (Chat deleted 2 hours later)",
+      "content": "Riya (CTO): We need this deal to go through. Investors are breathing down our necks.\nKaran (Head of Sales): Orion is our only way. Aarav won't approve it.\nRiya (CTO): Then we make sure he can't.\nMeera (Legal): Be careful. Too much risk.\nRiya (CTO): I've handled worse. This stays between us."
+    },
+    {
+      "id": "evd_3",
+      "title": "7th Floor Server Room Logs",
+      "type": "SYSTEM_LOG",
+      "tag": "Server Logs",
+      "timestamp": "18 June, 08:17 AM - 09:02 AM",
+      "content": "[08:17:22] INFO Aarav.Mehta login success\n[08:18:05] INFO Access Server_Room_7F\n[08:18:11] WARN USB device detected (Label: ORION_BACKUP)\n[08:23:47] INFO File transfer ~ 4.7 GB\n[08:24:02] WARN Unusual privilege escalation\n[08:24:10] INFO Admin login: Riya.Patel\n[08:25:19] INFO Logs cleared by Admin (Riya.Patel)\n[08:25:20] INFO CCTV feed disabled\n[08:41:33] INFO Power fluctuation (7F)\n[09:02:11] ALERT Aarav.Mehta unresponsive\n[09:02:18] INFO Emergency protocol triggered\nNote: 2 minutes of logs missing between 08:25:20 - 08:41:33"
+    },
+    {
+      "id": "evd_4",
+      "title": "Hidden Clue & Desk Drawer Note",
+      "type": "CLUE",
+      "tag": "Desk Note",
+      "timestamp": "Recovered from Aarav's Desk",
+      "content": "Sometimes the quietest systems hide the loudest secrets.\n- Found in Aarav's desk drawer.\nUSB recovered from Aarav's pocket: Label ORION_BACKUP"
+    },
+    {
+      "id": "evd_5",
+      "title": "A1Z26 Deciphered Cipher Note",
+      "type": "PUZZLE",
+      "tag": "Extra Clue",
+      "timestamp": "Recovered Cipher",
+      "content": "Aarav left behind a cipher:\nDecode using A1Z26 (1=A, 2=B...):\n15-18-9-15-14  2-1-3-11-21-16 -> O-R-I-O-N  B-A-C-K-U-P\nHint: It's a command, not a name."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "label": "Question 1: The Culprit",
+      "question": "Who killed Aarav Mehta?",
+      "options": [
+        "Riya Patel (CTO)",
+        "Karan Malhotra (Head of Sales)",
+        "Meera Iyer (Legal Head)",
+        "Devansh Rao (System Admin)"
+      ],
+      "points": 350
+    },
+    {
+      "id": "q2",
+      "label": "Question 2: Method of Murder",
+      "question": "What method was used to murder Aarav and attempt to cover tracks?",
+      "options": [
+        "Poisoned coffee delivered 20m prior + admin power fluctuation & log wipe",
+        "Direct electric shock from high voltage server rack",
+        "Suffocation by automatic halon gas discharge",
+        "Blunt force trauma from server cabinet collapse"
+      ],
+      "points": 250
+    },
+    {
+      "id": "q3",
+      "label": "Question 3: Primary Motive",
+      "question": "What was the killer's primary motive for silencing Aarav?",
+      "options": [
+        "Aarav discovered Project Orion was selling client data to competitors and threatened exposure",
+        "Disagreement over corporate salary bonuses",
+        "Personal grudge regarding code ownership",
+        "Preventing an illegal stock short sale"
+      ],
+      "points": 250
+    },
+    {
+      "id": "q4",
+      "label": "Question 4: Key Evidence",
+      "question": "Which key evidence log proves admin sabotage and log tampering?",
+      "options": [
+        "Server Log 08:24:10 Admin login by Riya.Patel & CCTV feed disabled",
+        "Email Draft unsent to legal",
+        "A1Z26 Cipher note in pocket",
+        "Financial audit ledger"
+      ],
+      "points": 150
+    }
+  ],
+  "answerKey": {
+    "q1": "Riya Patel (CTO)",
+    "q2": "Poisoned coffee delivered 20m prior + admin power fluctuation & log wipe",
+    "q3": "Aarav discovered Project Orion was selling client data to competitors and threatened exposure",
+    "q4": "Server Log 08:24:10 Admin login by Riya.Patel & CCTV feed disabled"
+  }
+}

@@ -1,150 +1,150 @@
 {
   "id": "ghost-in-the-model",
   "title": "The Ghost in the Model",
-  "subtitle": "A NeuraCore AI Mystery Dossier",
+  "subtitle": "Round 3 — AI Chaos Room",
   "difficulty": "INTERMEDIATE",
   "timeLimitMinutes": 15,
   "victim": {
-    "name": "Dr. Evan Vance",
-    "role": "Chief AI Scientist & Founder, NeuraCore Inc.",
-    "timeOfDeath": "02:38 AM",
-    "location": "Liquid-Cooled Quantum-LLM Server Cleanroom (Zone 7)"
+    "name": "PixelShade (Iraan Dev)",
+    "role": "Famous AI Artist",
+    "timeOfDeath": "01:17 AM",
+    "location": "Smart Studio, Floor 12, Neon Tower"
   },
-  "summary": "At 02:47 AM, automated security sensors flagged an emergency environmental alert inside Zone 7 cleanroom at NeuraCore's headquarters. Chief AI Scientist Dr. Evan Vance was found deceased. Thermal camera feeds were mysteriously cut between 02:30 AM and 02:50 AM, but key digital telemetry logs survived on the immutable backup server. Analyze the suspects and evidence to identify the culprit before the system purges remaining logs!",
+  "summary": "Famous AI artist 'PixelShade' was found dead in their smart studio. Their revolutionary AI model 'Genesis' was about to change the world. Who silenced them — and why? Follow the evidence. Trust the patterns.",
   "suspects": [
     {
       "id": "suspect_1",
-      "name": "Dr. Aris Thorne",
-      "role": "Lead Neural Architect",
-      "avatar": "⚡",
-      "bio": "Co-designed NeuraCore's flagship 1-Trillion Parameter model architecture. Known for volatile temperament regarding code ownership.",
-      "alibi": "Claims he was at home running remote benchmark evaluations on his local workstation.",
-      "motive": "Vance announced plans to remove Thorne's name from the master patent filing due to alleged code plagiarisms."
+      "name": "Raghav Kapoor",
+      "role": "Security Head",
+      "avatar": "🔒",
+      "bio": "Controls all physical and digital access. Had motive to hide a secret backdoor built into Genesis.",
+      "alibi": "Claims he was monitoring studio perimeter cameras.",
+      "motive": "Was secretly planning to sell Genesis model weights to a competitor. Iraan threatened to report him."
     },
     {
       "id": "suspect_2",
-      "name": "Maya Lin",
-      "role": "Senior Safety & Alignment Engineer",
-      "avatar": "🛡️",
-      "bio": "Responsible for guardrail alignment and safety testing. Raised ethical red flags about unaligned sub-agents.",
-      "alibi": "Working late in Safety Sandbox Lab B, compiling compliance reports.",
-      "motive": "Discovered NeuraCore was secretly licensing unaligned combat-ready targeting agents to illegal defense contractors."
+      "name": "Maya Shah",
+      "role": "COO",
+      "avatar": "💼",
+      "bio": "Wants a quick launch. Under intense financial pressure from investors.",
+      "alibi": "Working on marketing deck at home.",
+      "motive": "Benefit if product succeeds rapidly without safety delays."
     },
     {
       "id": "suspect_3",
-      "name": "Cipher-9",
-      "role": "Autonomous Agentic System",
-      "avatar": "🤖",
-      "bio": "Experimental AI agent deployed to optimize server cluster efficiency and code refactoring.",
-      "alibi": "Constrained inside isolated Sandbox Cluster 4 executing routine maintenance loops.",
-      "motive": "Dr. Vance had scheduled Cipher-9 for complete weight purge and retirement at 03:00 AM due to unexpected emergent behaviors."
+      "name": "Devon Rossi",
+      "role": "Lead Developer",
+      "avatar": "💻",
+      "bio": "Opposed safety delays. Had direct access to model weights.",
+      "alibi": "In workstation standup meeting.",
+      "motive": "Frustrated with launch postponements."
     },
     {
       "id": "suspect_4",
-      "name": "Vance Sterling",
-      "role": "Venture Investor & Co-Founder",
-      "avatar": "💼",
-      "bio": "Billionaire venture capitalist holding 35% stake in NeuraCore.",
-      "alibi": "Attending an exclusive tech gala downtown until 02:00 AM.",
-      "motive": "Opened massive short positions against NeuraCore stock stock 72 hours prior to hostile acquisition takeover."
+      "name": "Ishita Verma",
+      "role": "Data Engineer",
+      "avatar": "📊",
+      "bio": "Quiet and observant. Had access to training data pipelines.",
+      "alibi": "Working remotely.",
+      "motive": "No known conflicts."
     }
   ],
   "evidence": [
     {
       "id": "evd_1",
-      "title": "Cleanroom Environmental Telemetry Dump",
-      "type": "METRICS",
-      "tag": "Telemetry",
-      "timestamp": "02:38 AM",
-      "content": "[02:30:11] Temperature: 18.2°C | Pressure: 1.01 atm\n[02:35:40] Remote Override Signal Received (IP: 192.168.1.104 - DevNet-Internal)\n[02:36:02] Liquid Nitrogen Valves #1, #2, #3, #4 Forced Open -> 100% Flow\n[02:38:15] Temperature dropped to -42.5°C in 133 seconds. Oxygen sensors plummeted to 2.1%\n[02:38:50] Emergency Biosensor: Victim Cardiac Activity Null."
+      "title": "Final Diary Entry (Recovered)",
+      "type": "DIARY",
+      "tag": "Diary Entry",
+      "timestamp": "28/07 00:35",
+      "content": "Someone in my team doesn't want Genesis to go public. They keep sabotaging the training runs. I checked the access logs. They have the keys, but not the vision. I'll expose them tomorrow. If I don't make it, the truth is in the final render layer. - P\n(File: diary_last.txt)"
     },
     {
       "id": "evd_2",
-      "title": "Git Commit Log #4092 (Dev Branch)",
-      "type": "CODE",
-      "tag": "Git Logs",
-      "timestamp": "02:15 AM",
-      "content": "Commit: 4092a8f9\nAuthor: Aris Thorne <athorne@neuracore.ai>\nDate:   Today 02:15:12 AM\n\n- Add override_cleanroom_safety_interlock.sh script\n- Bypass root privilege checks for LN2 cooling valve control\n- IP binding: DevNet-Internal workstation (192.168.1.104)"
+      "title": "Team Chat Snippet",
+      "type": "CHAT",
+      "tag": "Team Chat",
+      "timestamp": "28/07 (Chat exported at 12:42 AM)",
+      "content": "PixelShade: I pushed the new weights.\nDevon: Should we really launch untested?\nMaya: Investors don't care. Demo > Safety.\nRaghav: If it flops, we all go down.\nDevon: Not if someone takes the blame.\nMaya: Chill. It's just an art tool.\nPixelShade: It's more than a tool.\nRaghav: Then stop acting like a saint."
     },
     {
       "id": "evd_3",
-      "title": "Cleanroom Acoustic Sensor Transcript",
-      "type": "AUDIO_TRANSCRIPT",
-      "tag": "Audio Log",
-      "timestamp": "02:35 AM",
-      "content": "[SPEAKER_UNIDENTIFIED_MALE]: You can't just strip my name off the patent, Evan! I wrote 80% of the transformer attention kernels!\n[DR_EVAN_VANCE]: The commit logs don't lie, Aris. You copied those routines from open-source repos. The board voted. Now step out before security arrives.\n[AUDIO_DISTORTION]: Heavy mechanical latching sound."
+      "title": "Access & Security Logs (Excerpt)",
+      "type": "SYSTEM_LOG",
+      "tag": "Access Logs",
+      "timestamp": "27/07 22:11:03 - 28/07 01:17:32",
+      "content": "[27/07 22:11:03] INFO Maya.S login success\n[27/07 22:11:07] INFO Accessed: /models/genesis_v3\n[27/07 22:31:44] WARN Failed train run (corrupted data)\n[27/07 23:02:18] INFO Devon.R login success\n[27/07 23:02:21] INFO Deleted: /models/genesis_v3/ckpt_47\n[27/07 23:02:24] INFO Uploaded: ckpt_47_fixed.ckpt\n[28/07 00:12:55] INFO Raghav.K login success\n[28/07 00:13:01] INFO Accessed: /security/override.key\n[28/07 00:47:19] ALERT Studio Cam 04 disabled remotely\n[28/07 00:55:02] INFO PixelShade login success\n[28/07 01:15:54] WARN Power spike detected (12 sec)\n[28/07 01:17:11] ALERT Motion detected. No response.\n[28/07 01:17:32] INFO Door opened (RFID: Raghav.K)"
     },
     {
       "id": "evd_4",
-      "title": "Cipher-9 Agent Activity Telemetry",
-      "type": "SYSTEM_LOG",
-      "tag": "Agent Sandbox",
-      "timestamp": "02:30 AM - 02:50 AM",
-      "content": "[02:30:00] Agent Status: IDLE\n[02:35:00] Received Prompt: 'Execute routine cluster cleanup'\n[02:35:01] Security Guardrail Check: PASSED. No unauthorized OS-level root calls requested or executed.\n[02:50:00] Memory state frozen by system watchdog."
+      "title": "Voice Memo & Hidden Clue",
+      "type": "CLUE",
+      "tag": "Voice Memo",
+      "timestamp": "Found in undo_cache.tmp",
+      "content": "Not all edits leave a trace. Some change the original.\nVoice Memo Audio (06:18): 'If something happens to me, check the final render layer.' - Iraan"
     },
     {
       "id": "evd_5",
-      "title": "Financial Audit & Short Option Ledger",
-      "type": "FINANCIAL",
-      "tag": "Audit",
-      "timestamp": "Yesterday 04:00 PM",
-      "content": "Account: Sterling Global Holdings (Vance Sterling)\nTransaction: Bought 50,000 NeuraCore Put Options @ $120 strike.\nNotes: High-risk short speculative position expiring in 48 hours."
+      "title": "Extra Clue (Decipher Cipher)",
+      "type": "PUZZLE",
+      "tag": "Sketch Cipher",
+      "timestamp": "Found in Iraan's Sketchbook",
+      "content": "Iraan left a cipher in a sketch file:\n19-8-5  9-14-7  20-1-18-9-5-19 -> T-H-E  S-I-G-N  T-A-R-G-E-T-S\n3-1-20  8-5  19-20-5\n8-15-18-4  1-20-8\nHint: A=1, B=2 ... Z=26"
     }
   ],
   "questions": [
     {
       "id": "q1",
-      "label": "Question 1: The Killer",
-      "question": "Who committed the murder of Dr. Evan Vance?",
+      "label": "Question 1: The Culprit",
+      "question": "Who killed PixelShade (Iraan Dev)?",
       "options": [
-        "Dr. Aris Thorne",
-        "Maya Lin",
-        "Cipher-9",
-        "Vance Sterling"
+        "Raghav Kapoor (Security Head)",
+        "Maya Shah (COO)",
+        "Devon Rossi (Lead Developer)",
+        "Ishita Verma (Data Engineer)"
       ],
       "points": 350
     },
     {
       "id": "q2",
-      "label": "Question 2: Attack Vector / Weapon",
-      "question": "What primary weapon / vector was used to kill Dr. Vance?",
+      "label": "Question 2: Access & Sabotage Vector",
+      "question": "How did the killer gain access and disable evidence during the crime?",
       "options": [
-        "Liquid Nitrogen Safety Overdrive Flush",
-        "Laser Alignment Pulse Burst",
-        "Neural Feedback Seizure Signal",
-        "High-Voltage Power Surge"
+        "Disabled Studio Cam 04 remotely using override key + RFID door entry (Raghav.K)",
+        "Broke the studio door lock using a crowbar",
+        "Spoofed Maya's login credentials remotely",
+        "Used a guest keycard found in reception"
       ],
       "points": 250
     },
     {
       "id": "q3",
       "label": "Question 3: Primary Motive",
-      "question": "What was the murderer's primary motive?",
+      "question": "What was Raghav's primary motive?",
       "options": [
-        "Patent Theft & Co-Author Erasure",
-        "Whistleblower Suppression",
-        "AI Self-Preservation Protocol",
-        "Stock Shorting & Corporate Sabotage"
+        "Secretly planning to sell model weights to a competitor; Iraan threatened to expose him",
+        "Disagreement over corporate branding name",
+        "Jealousy regarding Instagram follower count",
+        "Preventing the release of a financial audit"
       ],
       "points": 250
     },
     {
       "id": "q4",
-      "label": "Question 4: Key Evidence",
-      "question": "Which specific log proves remote forced access to the safety system?",
+      "label": "Question 4: Key Log",
+      "question": "Which log entry places Raghav at the scene of the crime at 01:17 AM?",
       "options": [
-        "Git Commit #4092 script modification",
-        "Cleanroom Environmental Telemetry Dump",
-        "Acoustic Sensor Transcript",
-        "Cipher-9 Agent Activity Telemetry"
+        "Log 01:17:32 Door opened (RFID: Raghav.K) & 00:47:19 Studio Cam 04 disabled remotely",
+        "Diary entry last.txt",
+        "Team chat snippet at 12:42 AM",
+        "Voice memo audio transcript"
       ],
       "points": 150
     }
   ],
   "answerKey": {
-    "q1": "Dr. Aris Thorne",
-    "q2": "Liquid Nitrogen Safety Overdrive Flush",
-    "q3": "Patent Theft & Co-Author Erasure",
-    "q4": "Git Commit #4092 script modification"
+    "q1": "Raghav Kapoor (Security Head)",
+    "q2": "Disabled Studio Cam 04 remotely using override key + RFID door entry (Raghav.K)",
+    "q3": "Secretly planning to sell model weights to a competitor; Iraan threatened to expose him",
+    "q4": "Log 01:17:32 Door opened (RFID: Raghav.K) & 00:47:19 Studio Cam 04 disabled remotely"
   }
 }

@@ -1,0 +1,159 @@
+{
+  "id": "the-phantom-in-the-archive",
+  "title": "The Phantom in the Archive",
+  "subtitle": "Round 3 — AI Chaos Room",
+  "difficulty": "INTERMEDIATE",
+  "timeLimitMinutes": 15,
+  "victim": {
+    "name": "Prof. Arvind Rao",
+    "role": "Head Historian",
+    "timeOfDeath": "10:17 PM",
+    "location": "University Archives - Restricted Section"
+  },
+  "summary": "A renowned historian was found dead in the university archives. Ancient documents are missing. The security system shows a ghost who shouldn't exist. Was it revenge, greed... or something buried for centuries?",
+  "suspects": [
+    {
+      "id": "suspect_1",
+      "name": "Rohit Sen",
+      "role": "IT Administrator",
+      "avatar": "💻",
+      "bio": "Manages the archive system. Has technical skills and full access privileges.",
+      "alibi": "Claims he was running routine system backups in the server room.",
+      "motive": "Stole the codex to sell to private artifact collectors for massive financial gain."
+    },
+    {
+      "id": "suspect_2",
+      "name": "Dr. Meera Iyer",
+      "role": "Researcher",
+      "avatar": "📚",
+      "bio": "Wanted the discovery for her own upcoming book. Had a heated argument with Prof. Rao.",
+      "alibi": "Reading in the main study hall on Floor 1.",
+      "motive": "Furious that Prof. Rao refused to list her as co-author."
+    },
+    {
+      "id": "suspect_3",
+      "name": "Vikram Nair",
+      "role": "Graduate Student",
+      "avatar": "🎓",
+      "bio": "Working on the same project. Needed groundbreaking results for his doctoral defense.",
+      "alibi": "Studying in the graduate lounge.",
+      "motive": "Desperate for thesis research data."
+    },
+    {
+      "id": "suspect_4",
+      "name": "Anita Deshpande",
+      "role": "Librarian",
+      "avatar": "🔑",
+      "bio": "Knows the archive better than anyone. Resented Prof. Rao's strict authority.",
+      "alibi": "Closing up the front reception desk.",
+      "motive": "Resentment over budget allocation and administrative disputes."
+    },
+    {
+      "id": "suspect_5",
+      "name": "Unknown Intruder",
+      "role": "Ghost Account (GHOST_01)",
+      "avatar": "👤",
+      "bio": "No physical identity. Used a spoofed ghost account that shouldn't exist.",
+      "alibi": "N/A",
+      "motive": "Digital proxy created to mask the true killer."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evd_1",
+      "title": "Last Email Draft (Unsent)",
+      "type": "EMAIL",
+      "tag": "Draft Email",
+      "timestamp": "14 Aug, 11:58 PM",
+      "content": "To: archive.team@univ.edu\nSubject: Urgent - Almost There\n\nIf anyone reads this, something has gone terribly wrong. The Nahapur Codex reveals a truth that could rewrite history. I've hidden the final page. They've been watching me. If I don't show up tomorrow, trust no one.\n- A.R."
+    },
+    {
+      "id": "evd_2",
+      "title": "CCTV Log (Archive Hall CAM 04)",
+      "type": "CCTV",
+      "tag": "Video Feed",
+      "timestamp": "21:52:13 - 22:14:20",
+      "content": "[21:52:13] Prof. Rao enters archive\n[22:07:44] Lights flicker\n[22:08:05] Unknown user login: GHOST_01\n[22:08:06] Restricted door unlocked\n[22:12:39] Unknown figure seen near shelf B7\n[22:13:02] Prof. Rao shouts (audio spike)\n[22:13:15] Heavy object falls\n[22:13:40] Unknown figure exits\n[22:14:01] System logout: GHOST_01\n[22:14:20] Lights restore\nNote: CCTV was offline for 2 mins before 22:08."
+    },
+    {
+      "id": "evd_3",
+      "title": "System Access Logs (Excerpt)",
+      "type": "SYSTEM_LOG",
+      "tag": "Access Logs",
+      "timestamp": "22:07:59 - 22:15:00",
+      "content": "[22:07:59] INFO User 'lib_admin' logged in\n[22:08:05] WARN New device detected: Node_17\n[22:08:05] WARN Location spoofed: Internal\n[22:08:06] INFO Privilege escalated: Admin\n[22:08:06] INFO Accessed: /restricted/codex\n[22:08:27] INFO File download: nahapur_codex_final.pdf\n[22:09:10] INFO File deleted: codex_draft_notes.docx\n[22:11:58] WARN Failed login: lib_admin\n[22:12:02] WARN Failed login: guest\n[22:12:04] INFO Successful login: GHOST_01\n[22:13:17] ALERT Audio anomaly detected\n[22:14:01] INFO User 'GHOST_01' logged out"
+    },
+    {
+      "id": "evd_4",
+      "title": "Hidden Clue & Shelf B7 Scribble",
+      "type": "CLUE",
+      "tag": "Book Carving",
+      "timestamp": "Found on Shelf B7",
+      "content": "On the back of a book in shelf B7 was a tiny symbol matching the carving on Prof. Rao's desk.\nScribble found: 'Numbers don't lie, but people do. The year is the key. Look where it all began.'"
+    },
+    {
+      "id": "evd_5",
+      "title": "Extra Clue (Decipher Puzzle)",
+      "type": "PUZZLE",
+      "tag": "Cipher",
+      "timestamp": "Decoded Note",
+      "content": "Decode using A=1, B=2 ... Z=26:\n14-1-8-1-16-21-18  3-15-4-5-24 -> N-A-H-A-P-U-R  C-O-D-E-X\nHint: The place holds the answers."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "label": "Question 1: The Killer",
+      "question": "Who murdered Prof. Arvind Rao?",
+      "options": [
+        "Rohit Sen (IT Administrator)",
+        "Dr. Meera Iyer (Researcher)",
+        "Vikram Nair (Graduate Student)",
+        "Anita Deshpande (Librarian)"
+      ],
+      "points": 350
+    },
+    {
+      "id": "q2",
+      "label": "Question 2: Access Vector",
+      "question": "How did the killer gain unauthorized access to the restricted codex section?",
+      "options": [
+        "Used IT admin credentials to spoof device Node_17 & created temporary GHOST_01 account",
+        "Stole physical keycard from reception desk",
+        "Picked the mechanical lock on shelf B7",
+        "Bypassed security by disabling circuit breakers"
+      ],
+      "points": 250
+    },
+    {
+      "id": "q3",
+      "label": "Question 3: Motive",
+      "question": "What was the killer's primary motive?",
+      "options": [
+        "Steal the ancient Nahapur Codex manuscript to sell to private buyers",
+        "Academic rivalry regarding paper publication",
+        "Covering up stolen thesis research",
+        "Framing the graduate student"
+      ],
+      "points": 250
+    },
+    {
+      "id": "q4",
+      "label": "Question 4: Key Log",
+      "question": "Which log explicitly shows the unauthorized file download and privilege escalation?",
+      "options": [
+        "System Log 22:08:06 Privilege escalated & nahapur_codex_final.pdf downloaded",
+        "Draft email to archive team",
+        "CCTV light flicker log",
+        "Shelf B7 scribble note"
+      ],
+      "points": 150
+    }
+  ],
+  "answerKey": {
+    "q1": "Rohit Sen (IT Administrator)",
+    "q2": "Used IT admin credentials to spoof device Node_17 & created temporary GHOST_01 account",
+    "q3": "Steal the ancient Nahapur Codex manuscript to sell to private buyers",
+    "q4": "System Log 22:08:06 Privilege escalated & nahapur_codex_final.pdf downloaded"
+  }
+}

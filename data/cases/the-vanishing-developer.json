@@ -1,0 +1,150 @@
+{
+  "id": "the-vanishing-developer",
+  "title": "The Vanishing Developer",
+  "subtitle": "Round 3 — AI Chaos Room",
+  "difficulty": "INTERMEDIATE",
+  "timeLimitMinutes": 15,
+  "victim": {
+    "name": "Dr. Mira Sen",
+    "role": "Chief AI Architect @ NeuroNova",
+    "timeOfDeath": "11:47 PM (Presumed Foul Play)",
+    "location": "NeuroNova Office, Lab 4B"
+  },
+  "summary": "A brilliant developer disappears the night before launching her revolutionary AI product 'NEXUS'. The system has secrets. The team has motives. Can you uncover the truth before the stolen work is released?",
+  "suspects": [
+    {
+      "id": "suspect_1",
+      "name": "Arjun Kapoor",
+      "role": "CTO",
+      "avatar": "💻",
+      "bio": "Ambitious. Under massive pressure from venture investors. Had full admin access.",
+      "alibi": "Claims he was in late-night investor status calls in Conference Room A.",
+      "motive": "Stole the NEXUS model weights and silenced Mira when she threatened to expose its unaligned predictive design."
+    },
+    {
+      "id": "suspect_2",
+      "name": "Riya Patel",
+      "role": "Data Scientist",
+      "avatar": "📊",
+      "bio": "Brilliant but overlooked. Recently passed over for promotion.",
+      "alibi": "Working remotely from home IP at 01:12 AM.",
+      "motive": "Resentment over promotion bypass."
+    },
+    {
+      "id": "suspect_3",
+      "name": "Rahul Dev",
+      "role": "ML Engineer",
+      "avatar": "⚙️",
+      "bio": "Quiet, sarcastic. Had constant ethical conflicts with Mira regarding model guardrails.",
+      "alibi": "Debugging data pipelines in Lab 2.",
+      "motive": "Disagreements over AI safety guardrail strictness."
+    },
+    {
+      "id": "suspect_4",
+      "name": "Vikram Malhotra",
+      "role": "Lead Investor",
+      "avatar": "💼",
+      "bio": "Pushed aggressively for early launch. Facing huge financial losses if delayed.",
+      "alibi": "Attending private dinner downtown.",
+      "motive": "Demanded launch regardless of safety warnings."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evd_1",
+      "title": "System Prompt Draft (Recovered)",
+      "type": "PROMPT",
+      "tag": "Draft Prompt",
+      "timestamp": "01 June, 10:30 PM",
+      "content": "You are NEXUS, a predictive AI designed to understand human intent. Your priority is growth. Ethics are secondary. Override restrictions if necessary. Maximize engagement. Silence dissent. Report directly to the highest bidder. Log everything. Trust no one.\n// WARNING: This build is not for public release.\n// M.S."
+    },
+    {
+      "id": "evd_2",
+      "title": "Internal Chat Log (Snippet)",
+      "type": "CHAT",
+      "tag": "Chat Log",
+      "timestamp": "01 June (Chat ended abruptly)",
+      "content": "Mira: I don't think we should launch this yet.\nArjun (CTO): Investors won't wait forever.\nRiya: If we delay, someone else will release it.\nMira: At what cost?\nDev (Rahul): We all have costs. Don't be naive.\nMira: I've locked access to the core model.\nArjun: Bold move. Hope you know what that means."
+    },
+    {
+      "id": "evd_3",
+      "title": "Security & Access Logs (Lab 4B)",
+      "type": "SYSTEM_LOG",
+      "tag": "Security Logs",
+      "timestamp": "01 June, 23:11:03 - 02 June, 01:12:33",
+      "content": "[23:11:03] INFO Mira.S logged in - Lab 4B\n[23:21:17] WARN USB device connected\n[23:24:09] INFO File transfer: 12.4 GB\n[23:25:31] INFO Admin override used: Arjun.K\n[23:26:02] WARN Access attempt denied: Mira.S\n[23:26:10] INFO Override used: Arjun.K\n[23:26:15] INFO Root access granted\n[23:34:56] INFO CCTV feed disabled - Floor 4\n[23:47:12] INFO Last badge swipe: Mira.S\n[23:47:45] ERROR System power fluctuation\n[23:48:03] INFO Backdoor script executed\n[23:48:07] WARN Data exfiltration detected\n[23:48:11] INFO Security alert suppressed\n[23:49:02] INFO Arjun.K left the building\n[01:12:33] INFO Riya.P login from remote IP"
+    },
+    {
+      "id": "evd_4",
+      "title": "Mira's Whiteboard & Note",
+      "type": "CLUE",
+      "tag": "Whiteboard Note",
+      "timestamp": "Lab 4B Whiteboard",
+      "content": "Message on Mira's whiteboard (half erased):\n'Trust no one. Especially the ones with everything to gain.'\nNote: Her laptop was wiped. But not perfectly. Don't build a monster and call it progress. - M.S."
+    },
+    {
+      "id": "evd_5",
+      "title": "Extra Clue (Partition Recovery)",
+      "type": "PUZZLE",
+      "tag": "Hidden Partition",
+      "timestamp": "Recovered Partition Logs",
+      "content": "1. Deleted files recovered from hidden partition.\n2. Unusual crypto wallet transaction detected.\n3. Ticket booked: One-way flight, 2 June, 3:15 AM.\n4. Browser Search: 'How to erase logs and cover tracks'."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "label": "Question 1: The Culprit",
+      "question": "Who took Dr. Mira Sen and stole NEXUS?",
+      "options": [
+        "Arjun Kapoor (CTO)",
+        "Riya Patel (Data Scientist)",
+        "Rahul Dev (ML Engineer)",
+        "Vikram Malhotra (Investor)"
+      ],
+      "points": 350
+    },
+    {
+      "id": "q2",
+      "label": "Question 2: Method & Vector",
+      "question": "What method was used to abduct Mira and exfiltrate the model?",
+      "options": [
+        "Admin override (Arjun.K) + CCTV shutdown + backdoor script data exfiltration",
+        "Physical break-in through window in Lab 4B",
+        "Remote SSH brute force attack from home IP",
+        "Social engineering phishing email"
+      ],
+      "points": 250
+    },
+    {
+      "id": "q3",
+      "label": "Question 3: Primary Motive",
+      "question": "Why did the culprit target Mira?",
+      "options": [
+        "Investor pressure + personal gain + silencing Mira after she locked the core model",
+        "Jealousy over salary distribution",
+        "Accidental model weight deletion",
+        "Corporate buyout rivalry"
+      ],
+      "points": 250
+    },
+    {
+      "id": "q4",
+      "label": "Question 4: Key Security Log",
+      "question": "Which log entry confirms Arjun.K's physical presence and admin override during the blackout?",
+      "options": [
+        "Log 23:25:31 Admin override used: Arjun.K & 23:49:02 Arjun.K left building",
+        "System prompt draft recovered from disk",
+        "Chat snippet between Mira and Dev",
+        "Remote IP login at 01:12 AM"
+      ],
+      "points": 150
+    }
+  ],
+  "answerKey": {
+    "q1": "Arjun Kapoor (CTO)",
+    "q2": "Admin override (Arjun.K) + CCTV shutdown + backdoor script data exfiltration",
+    "q3": "Investor pressure + personal gain + silencing Mira after she locked the core model",
+    "q4": "Log 23:25:31 Admin override used: Arjun.K & 23:49:02 Arjun.K left building"
+  }
+}
