@@ -21,11 +21,6 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Admin Modal State
-  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
-  const [adminPassword, setAdminPassword] = useState("");
-  const [adminError, setAdminError] = useState("");
-
   // Check if squad session already exists on mount -> Auto Redirect to prevent back navigation to join screen
   useEffect(() => {
     fetch("/api/submissions")
@@ -98,16 +93,6 @@ export default function LandingPage() {
     }
   };
 
-  const handleAdminLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!adminPassword) {
-      setAdminError("Access key is required.");
-      return;
-    }
-    localStorage.setItem("aimurdle_admin_pass", adminPassword);
-    router.push("/admin");
-  };
-
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-4 md:py-8 md:px-4 max-w-[640px] w-[94%] mx-auto font-mono text-black">
       {/* Newspaper Booklet Masthead */}
@@ -115,12 +100,12 @@ export default function LandingPage() {
         <div className="flex justify-between items-center pb-2 border-b-2 border-black text-xs font-bold uppercase tracking-wider text-[#6b7280]">
           <span>VOL. 1 // CASE #092</span>
           <span>THE DAILY MYSTERY DOSSIER</span>
-          <button
-            onClick={() => setIsAdminModalOpen(true)}
+          <a
+            href="https://acmurdle.vercel.app/admin"
             className="px-2 py-0.5 border-2 border-black bg-white text-black hover:bg-[#fff5e2] font-bold shadow-[2px_2px_0px_#000] transition"
           >
             [ HOST LOGIN ]
-          </button>
+          </a>
         </div>
 
         {/* Main Title Banner */}
@@ -187,58 +172,6 @@ export default function LandingPage() {
           </button>
         </form>
       </div>
-
-
-
-      {/* Admin Login Modal */}
-      {isAdminModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-          <div className="w-full max-w-md bg-[#fff5e2] border-[3px] border-black p-6 shadow-[6px_6px_0px_#000000] relative">
-            <div className="flex justify-between items-center pb-2 mb-4 border-b-2 border-black">
-              <span className="font-bold uppercase text-xs md:text-sm text-[#A30B37]">
-                [ HOST COMMAND ACCESS ]
-              </span>
-              <button
-                onClick={() => setIsAdminModalOpen(false)}
-                className="font-bold text-xs border-2 border-black px-1.5 py-0.5 bg-white text-black hover:bg-black hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p className="text-xs mb-4 text-black">
-              Enter the master host key to access synchronized timer controls, live squad rosters, and solution reveals.
-            </p>
-
-            <form onSubmit={handleAdminLogin} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase mb-1 text-black">
-                  MASTER KEY:
-                </label>
-                <input
-                  type="password"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  placeholder="Enter configured access key"
-                  className="w-full bg-white border-2 border-black p-2.5 text-xs font-mono font-bold text-black placeholder-[#6b7280] outline-none shadow-[2px_2px_0px_#000000]"
-                  required
-                />
-              </div>
-
-              {adminError && (
-                <p className="text-xs font-bold text-[#A30B37]">{adminError}</p>
-              )}
-
-              <button
-                type="submit"
-                className="w-full py-3 bg-[#A30B37] hover:bg-[#85082c] text-white border-[3px] border-black font-bold text-xs uppercase tracking-wider shadow-[4px_4px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px]"
-              >
-                ENTER COMMAND DASHBOARD
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
