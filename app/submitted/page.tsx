@@ -250,72 +250,15 @@ function SubmittedContent() {
               </p>
             </div>
 
-            {/* Leaderboard Toggle Button */}
+            {/* Leaderboard Popup Trigger Button */}
             <div className="pt-2">
               <button
-                onClick={() => setShowLeaderboard(!showLeaderboard)}
-                className="w-full py-2.5 bg-[#fff5e2] hover:bg-black hover:text-white border-2 border-black font-black text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shadow-[3px_3px_0px_#000] transition"
+                onClick={() => setShowLeaderboard(true)}
+                className="w-full py-3 bg-[#fff5e2] hover:bg-black hover:text-white border-2 border-black font-black text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] transition"
               >
                 <Trophy className="w-4 h-4 text-[#A30B37]" />
-                <span>{showLeaderboard ? "[ HIDE LIVE LEADERBOARD ]" : "[ VIEW LIVE LEADERBOARD ]"}</span>
+                <span>[ VIEW LIVE LEADERBOARD ]</span>
               </button>
-
-              {showLeaderboard && (
-                <div className="mt-3 space-y-2 text-left">
-                  <div className="flex justify-between items-center border-b-2 border-black pb-1">
-                    <h3 className="text-xs font-black uppercase text-black">
-                      [ COMPETING SQUADS LEADERBOARD ]
-                    </h3>
-                    <span className="text-[10px] font-bold text-[#6b7280]">
-                      {totalSquads} SQUADS TOTAL
-                    </span>
-                  </div>
-
-                  <div className="border-2 border-black overflow-x-auto bg-white shadow-[2px_2px_0px_#000]">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="border-b-2 border-black bg-[#f5f5f5] text-black font-bold uppercase">
-                          <th className="p-2.5">Rank</th>
-                          <th className="p-2.5">Squad Name</th>
-                          <th className="p-2.5 text-center">Status</th>
-                          <th className="p-2.5 text-right">Score</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-black">
-                        {leaderboardList.map((item: any, idx: number) => {
-                          const isCurrentSquad = item.teamName?.toLowerCase().trim() === submission?.teamName?.toLowerCase().trim();
-                          return (
-                            <tr
-                              key={item.teamName}
-                              className={
-                                isCurrentSquad
-                                  ? "bg-[#fff5e2] font-black border-l-4 border-l-[#A30B37]"
-                                  : "hover:bg-[#fbfbf9]"
-                              }
-                            >
-                              <td className="p-2.5 font-bold">#{idx + 1}</td>
-                              <td className="p-2.5 font-bold uppercase text-black flex items-center space-x-1.5">
-                                <span>{item.teamName}</span>
-                                {isCurrentSquad && (
-                                  <span className="px-1.5 py-0.5 border border-black bg-[#A30B37] text-white text-[9px] font-bold uppercase">
-                                    YOU
-                                  </span>
-                                )}
-                              </td>
-                              <td className="p-2.5 text-center font-bold text-[#6b7280] text-[10px] uppercase">
-                                {item.isSubmitted ? "SEALED" : "ACTIVE"}
-                              </td>
-                              <td className="p-2.5 text-right font-black text-black">
-                                {item.score || 0} PTS
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         ) : (
@@ -418,80 +361,107 @@ function SubmittedContent() {
               </div>
             </div>
 
-            {/* Live Leaderboard Section */}
+            {/* Leaderboard Popup Trigger Button */}
             <div className="pt-2">
               <button
-                onClick={() => setShowLeaderboard(!showLeaderboard)}
-                className="w-full py-2.5 bg-[#fff5e2] hover:bg-black hover:text-white border-2 border-black font-black text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shadow-[3px_3px_0px_#000] transition"
+                onClick={() => setShowLeaderboard(true)}
+                className="w-full py-3 bg-[#fff5e2] hover:bg-black hover:text-white border-2 border-black font-black text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] transition"
               >
                 <Trophy className="w-4 h-4 text-[#A30B37]" />
-                <span>{showLeaderboard ? "[ HIDE LIVE LEADERBOARD ]" : "[ VIEW LIVE LEADERBOARD ]"}</span>
+                <span>[ VIEW LIVE LEADERBOARD ]</span>
               </button>
-
-              {showLeaderboard && (
-                <div className="mt-3 space-y-2 text-left">
-                  <div className="flex justify-between items-center border-b-2 border-black pb-1">
-                    <h3 className="text-xs font-black uppercase text-black">
-                      [ COMPETING SQUADS LEADERBOARD ]
-                    </h3>
-                    <span className="text-[10px] font-bold text-[#6b7280]">
-                      {totalSquads} SQUADS TOTAL
-                    </span>
-                  </div>
-
-                  <div className="border-2 border-black overflow-x-auto bg-white shadow-[2px_2px_0px_#000]">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="border-b-2 border-black bg-[#f5f5f5] text-black font-bold uppercase">
-                          <th className="p-2.5">Rank</th>
-                          <th className="p-2.5">Squad Name</th>
-                          <th className="p-2.5 text-center">Correct</th>
-                          <th className="p-2.5 text-center">Time</th>
-                          <th className="p-2.5 text-right">Score</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-black">
-                        {leaderboardList.map((item: any, idx: number) => {
-                          const isCurrentSquad = item.teamName?.toLowerCase().trim() === submission?.teamName?.toLowerCase().trim();
-                          return (
-                            <tr
-                              key={item.teamName}
-                              className={
-                                isCurrentSquad
-                                  ? "bg-[#fff5e2] font-black border-l-4 border-l-[#A30B37]"
-                                  : "hover:bg-[#fbfbf9]"
-                              }
-                            >
-                              <td className="p-2.5 font-bold">#{idx + 1}</td>
-                              <td className="p-2.5 font-bold uppercase text-black flex items-center space-x-1.5">
-                                <span>{item.teamName}</span>
-                                {isCurrentSquad && (
-                                  <span className="px-1.5 py-0.5 border border-black bg-[#A30B37] text-white text-[9px] font-bold uppercase">
-                                    YOU
-                                  </span>
-                                )}
-                              </td>
-                              <td className="p-2.5 text-center font-bold text-[#A30B37]">
-                                {item.breakdown?.correctCount || 0} / 3
-                              </td>
-                              <td className="p-2.5 text-center text-[#6b7280]">
-                                {item.timeTakenSeconds || 0}s
-                              </td>
-                              <td className="p-2.5 text-right font-black text-black">
-                                {item.score || 0} PTS
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}
       </div>
+
+      {/* 🏆 POPUP LEADERBOARD MODAL ────────────────────────────────────────── */}
+      {showLeaderboard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-lg bg-white border-[3px] border-black p-5 md:p-6 shadow-[6px_6px_0px_#000000] relative max-h-[85vh] flex flex-col font-mono text-black">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center pb-3 border-b-2 border-black mb-4">
+              <div>
+                <span className="text-[10px] font-black uppercase text-[#A30B37] tracking-widest block">
+                  [ OFFICIAL INCIDENT ARCHIVE ]
+                </span>
+                <h3 className="text-base font-black uppercase text-black flex items-center space-x-1.5">
+                  <Trophy className="w-4 h-4 text-[#A30B37]" />
+                  <span>LIVE SQUAD LEADERBOARD</span>
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowLeaderboard(false)}
+                className="w-7 h-7 border-2 border-black bg-white hover:bg-black hover:text-white font-bold text-xs flex items-center justify-center transition shadow-[2px_2px_0px_#000]"
+                title="Close Leaderboard"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body: Scrollable Table */}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+              <div className="border-2 border-black overflow-x-auto bg-white shadow-[2px_2px_0px_#000]">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b-2 border-black bg-[#f5f5f5] text-black font-bold uppercase">
+                      <th className="p-2.5">Rank</th>
+                      <th className="p-2.5">Squad Name</th>
+                      <th className="p-2.5 text-center">Correct</th>
+                      <th className="p-2.5 text-center">Time</th>
+                      <th className="p-2.5 text-right">Score</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-black">
+                    {leaderboardList.map((item: any, idx: number) => {
+                      const isCurrentSquad = item.teamName?.toLowerCase().trim() === submission?.teamName?.toLowerCase().trim();
+                      return (
+                        <tr
+                          key={item.teamName}
+                          className={
+                            isCurrentSquad
+                              ? "bg-[#fff5e2] font-black border-l-4 border-l-[#A30B37]"
+                              : "hover:bg-[#fbfbf9]"
+                          }
+                        >
+                          <td className="p-2.5 font-bold">#{idx + 1}</td>
+                          <td className="p-2.5 font-bold uppercase text-black flex items-center space-x-1.5">
+                            <span className="truncate max-w-[120px]">{item.teamName}</span>
+                            {isCurrentSquad && (
+                              <span className="px-1.5 py-0.5 border border-black bg-[#A30B37] text-white text-[9px] font-bold uppercase">
+                                YOU
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-2.5 text-center font-bold text-[#A30B37]">
+                            {item.breakdown?.correctCount || 0} / 3
+                          </td>
+                          <td className="p-2.5 text-center text-[#6b7280]">
+                            {item.timeTakenSeconds || 0}s
+                          </td>
+                          <td className="p-2.5 text-right font-black text-black">
+                            {item.score || 0} PTS
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-4 border-t-2 border-black mt-4">
+              <button
+                onClick={() => setShowLeaderboard(false)}
+                className="w-full py-2.5 bg-white hover:bg-[#fff5e2] text-black border-2 border-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] transition"
+              >
+                [ CLOSE LEADERBOARD ✕ ]
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
