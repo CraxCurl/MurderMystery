@@ -9,21 +9,16 @@ import {
   Pause,
   RotateCcw,
   Plus,
-  Minus,
   Eye,
   EyeOff,
   Trash2,
   Download,
   Tv,
   CheckCircle2,
-  XCircle,
   AlertTriangle,
   Users,
   Award,
-  Lock,
-  RefreshCw,
-  Cpu,
-  Zap,
+  Radio,
 } from "lucide-react";
 import SquadIconDisplay from "@/components/SquadIconDisplay";
 
@@ -51,7 +46,6 @@ export default function AdminPage() {
     const saved = localStorage.getItem("aimurdle_admin_pass") || "admin123";
     if (saved) {
       setAdminPassword(saved);
-      // Verify password against API
       fetch("/api/admin/submissions", {
         headers: { "x-admin-password": saved },
       }).then((res) => {
@@ -71,14 +65,14 @@ export default function AdminPage() {
           localStorage.setItem("aimurdle_admin_pass", adminPassword);
           setIsAuthenticated(true);
         } else {
-          setAuthError("Invalid Admin Access Key.");
+          setAuthError("Invalid Chief Inspector Access Key.");
         }
       })
       .catch(() => setAuthError("Network error authenticating."));
   };
 
   // SWR Hooks
-  const { data: subData, error: subError } = useSWR(
+  const { data: subData } = useSWR(
     isAuthenticated ? ["/api/admin/submissions", adminPassword] : null,
     ([url, pass]: [string, string]) => fetcher(url, pass),
     { refreshInterval: 2000 }
@@ -86,8 +80,8 @@ export default function AdminPage() {
 
   const { data: configData } = useSWR(
     isAuthenticated ? ["/api/config", adminPassword] : "/api/config",
-    (arg: string | [string, string]) =>
-      Array.isArray(arg) ? fetcher(arg[0], arg[1]) : fetcher(arg),
+    (key: string | [string, string]) =>
+      Array.isArray(key) ? fetcher(key[0], key[1]) : fetcher(key),
     { refreshInterval: 2000 }
   );
 
@@ -160,14 +154,14 @@ export default function AdminPage() {
     if (!submissions.length) return;
     let csv = "Rank,Squad Emblem,Team Name,Status,Score,Correct Count,Time Taken (s),Joined At,Submitted At\n";
     submissions.forEach((s: any, idx: number) => {
-      csv += `${idx + 1},"${s.squadBadge || "🔍"}","${s.teamName}","${s.isSubmitted ? "Submitted" : "Investigating"}",${s.score || 0},${s.breakdown?.correctCount || 0},${s.timeTakenSeconds || 0},"${s.joinedAt || ""}","${s.submittedAt || ""}"\n`;
+      csv += `${idx + 1},"${s.squadBadge || "search"}","${s.teamName}","${s.isSubmitted ? "Submitted" : "Investigating"}",${s.score || 0},${s.breakdown?.correctCount || 0},${s.timeTakenSeconds || 0},"${s.joinedAt || ""}","${s.submittedAt || ""}"\n`;
     });
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `AIMurdle_Leaderboard_${Date.now()}.csv`);
+    link.setAttribute("download", `Murdle_Squad_Roster_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -176,30 +170,41 @@ export default function AdminPage() {
   // Authentication barrier
   if (!isAuthenticated) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4 bg-cyber-bg cyber-bg-grid">
-        <div className="w-full max-w-md bg-slate-900 border border-cyber-magenta/50 rounded-2xl p-8 shadow-magenta-glow text-center">
-          <Shield className="w-12 h-12 text-cyber-magenta mx-auto mb-4 animate-pulse" />
-          <h1 className="text-2xl font-black text-white mb-2">HOST COMMAND DASHBOARD</h1>
-          <p className="text-xs text-slate-400 mb-6">Enter the Host Admin Password to access real-time game controls.</p>
+      <div className="flex-1 flex flex-col items-center justify-center p-4 bg-[#fbfbf9] text-black font-mono">
+        <div className="w-full max-w-md bg-[#fff5e2] border-3 border-black p-6 md:p-8 shadow-[6px_6px_0px_#000] text-center">
+          <div className="border-b-2 border-black pb-3 mb-4">
+            <span className="text-[10px] font-bold text-[#A30B37] uppercase tracking-widest block mb-1">
+              [ RESTRICTED ACCESS ]
+            </span>
+            <h1 className="text-xl font-black uppercase text-black">
+              CHIEF INSPECTOR CONSOLE
+            </h1>
+          </div>
+
+          <p className="text-xs text-black mb-5 leading-relaxed">
+            Enter host credentials to access master chronometer controls, live squad scoring, and solution key dispatch.
+          </p>
 
           <form onSubmit={handleLogin} className="space-y-4 text-left">
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-300 mb-1">Host Password</label>
+              <label className="block text-xs font-bold uppercase mb-1.5 text-black">
+                MASTER HOST KEY:
+              </label>
               <input
                 type="password"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
                 placeholder="Default: admin123"
-                className="w-full bg-slate-950 border border-slate-700 focus:border-cyber-magenta rounded-xl px-4 py-3 text-sm text-slate-100 outline-none"
+                className="w-full bg-white border-2 border-black p-3 text-xs font-mono font-bold text-black outline-none shadow-[2px_2px_0px_#000]"
                 required
               />
             </div>
 
-            {authError && <p className="text-xs text-red-400 font-semibold">{authError}</p>}
+            {authError && <p className="text-xs text-[#A30B37] font-bold">{authError}</p>}
 
             <button
               type="submit"
-              className="w-full py-3.5 rounded-xl bg-cyber-magenta hover:bg-cyber-magenta/90 text-white font-bold text-xs uppercase tracking-wider shadow-magenta-glow transition"
+              className="w-full py-3.5 bg-[#A30B37] hover:bg-[#85082c] text-white border-2 border-black font-bold text-xs uppercase tracking-wider shadow-[3px_3px_0px_#000] active:translate-x-[2px] active:translate-y-[2px]"
             >
               AUTHENTICATE COMMAND ACCESS
             </button>
@@ -212,87 +217,90 @@ export default function AdminPage() {
   // PROJECTOR FULLSCREEN DISPLAY MODE
   if (isProjectorMode) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 p-8 flex flex-col justify-between cyber-bg-grid relative">
+      <div className="min-h-screen bg-[#fbfbf9] text-black p-6 md:p-10 flex flex-col justify-between relative font-mono">
         <button
           onClick={() => setIsProjectorMode(false)}
-          className="absolute top-6 right-6 px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-bold text-slate-300 hover:text-white z-50"
+          className="absolute top-6 right-6 px-3 py-1.5 bg-white border-2 border-black text-xs font-bold uppercase hover:bg-black hover:text-white shadow-[2px_2px_0px_#000]"
         >
-          Exit Projector Mode ✕
+          [ EXIT PROJECTOR ✕ ]
         </button>
 
-        <div className="text-center max-w-4xl mx-auto space-y-4">
-          <div className="inline-flex items-center space-x-2 px-4 py-1 rounded-full bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan text-xs font-bold uppercase tracking-widest">
-            <Cpu className="w-4 h-4 animate-spin" />
-            <span>AIMURDLE LIVE COMMAND CENTER</span>
+        <div className="text-center max-w-4xl mx-auto space-y-3 pt-2">
+          <div className="inline-block px-3 py-1 border-2 border-black bg-[#fff5e2] text-xs font-bold uppercase tracking-widest">
+            MURDLE // LIVE BROADCAST BOARD
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight glow-cyan">
-            {config?.roundName || "Round 1 - NeuraCore AI Cleanroom"}
+          <h1 className="text-3xl md:text-5xl font-black uppercase text-black tracking-wide">
+            {config?.roundName || "CASE #092: THE GHOST IN THE MODEL"}
           </h1>
 
-          {/* Synchronized Giant Timer */}
-          <div className="inline-flex items-center space-x-4 px-8 py-3 rounded-2xl bg-slate-900/90 border border-cyber-cyan/50 shadow-cyan-glow my-4">
-            <Clock className="w-8 h-8 text-cyber-cyan animate-pulse" />
-            <span className="text-5xl md:text-6xl font-mono font-black text-cyber-cyan glow-cyan tracking-widest">
+          {/* Synchronized Giant Chronometer */}
+          <div className="inline-flex items-center space-x-3 px-8 py-3 bg-white border-3 border-black shadow-[5px_5px_0px_#000] my-2">
+            <Clock
+              className={`w-8 h-8 ${
+                timeLeftSeconds < 180 ? "text-[#A30B37] animate-pulse" : "text-black"
+              }`}
+            />
+            <span
+              className={`text-5xl md:text-6xl font-mono font-black tracking-widest ${
+                timeLeftSeconds < 180 ? "text-[#A30B37]" : "text-black"
+              }`}
+            >
               {formatTime(timeLeftSeconds)}
             </span>
           </div>
         </div>
 
         {/* Projector Leaderboard Table */}
-        <div className="max-w-5xl mx-auto w-full bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-2xl backdrop-blur-xl my-6 flex-1 flex flex-col">
-          <h2 className="text-lg font-bold text-slate-200 mb-4 flex items-center space-x-2">
-            <Award className="w-5 h-5 text-cyber-green" />
-            <span>LIVE SQUAD LEADERBOARD</span>
-          </h2>
+        <div className="max-w-4xl mx-auto w-full bg-white border-3 border-black p-5 md:p-6 shadow-[5px_5px_0px_#000] my-4 flex-1 flex flex-col">
+          <div className="border-b-2 border-black pb-2 mb-4 flex justify-between items-center">
+            <h2 className="text-sm md:text-base font-black uppercase text-black">
+              [ ACTIVE SQUAD LEADERBOARD ]
+            </h2>
+            <span className="text-xs font-bold text-[#6b7280]">
+              TOTAL SQUADS: {submissions.length}
+            </span>
+          </div>
 
-          <div className="flex-1 overflow-y-auto space-y-3">
+          <div className="flex-1 overflow-y-auto space-y-2.5">
             {submissions.length === 0 ? (
-              <div className="p-8 text-center text-slate-500 text-sm italic">
+              <div className="p-8 text-center text-[#6b7280] text-xs uppercase">
                 Awaiting investigator squad registrations...
               </div>
             ) : (
               submissions.map((s: any, idx: number) => (
                 <div
                   key={s.teamName}
-                  className={`p-4 rounded-2xl border flex items-center justify-between transition ${
+                  className={`p-3.5 border-2 border-black flex items-center justify-between transition ${
                     idx === 0
-                      ? "border-cyber-amber bg-cyber-amber/10 shadow-amber-glow"
-                      : idx === 1
-                      ? "border-slate-400 bg-slate-800/40"
-                      : idx === 2
-                      ? "border-amber-700 bg-slate-900/60"
-                      : "border-slate-800 bg-slate-900/40"
+                      ? "bg-[#fff5e2] shadow-[3px_3px_0px_#000]"
+                      : "bg-[#fbfbf9] shadow-[2px_2px_0px_#000]"
                   }`}
                 >
-                  <div className="flex items-center space-x-4">
-                    <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg ${
-                        idx === 0 ? "bg-cyber-amber text-slate-950" : "bg-slate-800 text-slate-300"
-                      }`}
-                    >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 border-2 border-black bg-white flex items-center justify-center font-black text-sm">
                       #{idx + 1}
                     </div>
 
-                    <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-cyber-cyan">
-                      <SquadIconDisplay iconId={s.squadBadge || "search"} className="w-6 h-6" />
+                    <div className="w-8 h-8 border border-black bg-white flex items-center justify-center">
+                      <SquadIconDisplay iconId={s.squadBadge || "search"} className="w-4 h-4" />
                     </div>
 
                     <div>
-                      <div className="text-lg font-bold text-white">{s.teamName}</div>
-                      <div className="text-xs text-slate-400">
+                      <div className="text-sm font-black uppercase text-black">{s.teamName}</div>
+                      <div className="text-[10px] font-bold text-[#6b7280] uppercase">
                         {s.isSubmitted ? (
-                          <span className="text-cyber-green font-semibold">✓ Deductions Sealed</span>
+                          <span className="text-[#A30B37]">✓ DEDUCTION SEALED</span>
                         ) : (
-                          <span className="text-cyber-cyan animate-pulse">⏳ Investigating...</span>
+                          <span>⏳ INVESTIGATING...</span>
                         )}
                       </div>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <div className="text-2xl font-black text-cyber-cyan glow-cyan">{s.score || 0} PTS</div>
-                    <div className="text-xs text-slate-400 font-mono">
+                    <div className="text-xl font-black text-black">{s.score || 0} PTS</div>
+                    <div className="text-[10px] text-[#6b7280] font-bold uppercase">
                       {s.breakdown?.correctCount || 0}/4 Correct • {s.timeTakenSeconds || 0}s
                     </div>
                   </div>
@@ -306,58 +314,60 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-cyber-bg p-4 md:p-8">
+    <div className="flex-1 flex flex-col min-h-screen bg-[#fbfbf9] p-4 md:p-8 text-black font-mono">
       {/* Top Admin Navbar */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-slate-800 gap-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-cyber-magenta/10 border border-cyber-magenta/40 flex items-center justify-center text-cyber-magenta shadow-magenta-glow">
-            <Shield className="w-6 h-6" />
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b-4 border-black gap-3 max-w-5xl mx-auto w-full">
+        <div>
+          <div className="text-[10px] font-bold uppercase text-[#A30B37]">
+            [ HOST COMMAND ROOM ]
           </div>
-          <div>
-            <h1 className="text-2xl font-black text-white tracking-wide">HOST COMMAND CENTER</h1>
-            <p className="text-xs text-slate-400">Real-Time Leaderboard & Multi-Squad Timer Manager</p>
-          </div>
+          <h1 className="text-xl md:text-2xl font-black uppercase text-black">
+            MURDLE CHIEF INSPECTOR CONSOLE
+          </h1>
+          <p className="text-xs text-[#6b7280]">
+            Master Incident Chronometer & Live Squad Evaluation Roster
+          </p>
         </div>
 
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setIsProjectorMode(true)}
-            className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-cyber-cyan/10 border border-cyber-cyan/40 text-cyber-cyan text-xs font-bold hover:bg-cyber-cyan/20 transition"
+            className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#fff5e2] border-2 border-black text-xs font-bold uppercase hover:bg-black hover:text-white transition shadow-[2px_2px_0px_#000]"
           >
-            <Tv className="w-4 h-4" />
+            <Tv className="w-3.5 h-3.5" />
             <span>PROJECTOR VIEW</span>
           </button>
 
           <button
             onClick={handleExportCSV}
-            className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 text-xs font-bold hover:text-white transition"
+            className="flex items-center space-x-1.5 px-3 py-1.5 bg-white border-2 border-black text-xs font-bold uppercase hover:bg-[#fff5e2] transition shadow-[2px_2px_0px_#000]"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5" />
             <span>EXPORT CSV</span>
           </button>
         </div>
       </header>
 
       {/* Main Admin Controls Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 my-8">
+      <div className="max-w-5xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-5 my-6">
         {/* Card 1: Synchronized Master Timer Controls */}
-        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-cyber-cyan" />
-              <span>Master Round Timer</span>
+        <div className="p-5 bg-white border-2 border-black shadow-[3px_3px_0px_#000] space-y-3">
+          <div className="flex justify-between items-center border-b border-black pb-2">
+            <h2 className="text-xs font-bold uppercase text-black flex items-center space-x-1.5">
+              <Clock className="w-3.5 h-3.5 text-black" />
+              <span>ROUND CHRONOMETER</span>
             </h2>
             <span
-              className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                config?.isTimerRunning ? "bg-cyber-green/10 text-cyber-green" : "bg-yellow-500/10 text-yellow-400"
+              className={`text-[10px] uppercase font-bold px-1.5 py-0.5 border border-black ${
+                config?.isTimerRunning ? "bg-[#fff5e2] text-black" : "bg-[#f5f5f5] text-[#6b7280]"
               }`}
             >
-              {config?.isTimerRunning ? "LIVE TICKING" : "PAUSED"}
+              {config?.isTimerRunning ? "RUNNING" : "PAUSED"}
             </span>
           </div>
 
-          <div className="text-center py-4 bg-slate-950 rounded-xl border border-slate-800">
-            <span className="text-4xl font-mono font-black text-cyber-cyan glow-cyan tracking-widest">
+          <div className="text-center py-3 bg-[#fff5e2] border-2 border-black shadow-inner">
+            <span className="text-4xl font-black tracking-widest text-black">
               {formatTime(timeLeftSeconds)}
             </span>
           </div>
@@ -367,7 +377,7 @@ export default function AdminPage() {
             {config?.isTimerRunning ? (
               <button
                 onClick={() => sendConfigAction({ action: "pause" })}
-                className="py-2 rounded-xl bg-yellow-500/20 border border-yellow-500/40 text-yellow-300 font-bold text-xs flex items-center justify-center space-x-1 hover:bg-yellow-500/30"
+                className="py-2 bg-white border-2 border-black text-xs font-bold uppercase flex items-center justify-center space-x-1 hover:bg-[#fff5e2] shadow-[2px_2px_0px_#000]"
               >
                 <Pause className="w-3.5 h-3.5" />
                 <span>PAUSE</span>
@@ -375,7 +385,7 @@ export default function AdminPage() {
             ) : (
               <button
                 onClick={() => sendConfigAction({ action: "start" })}
-                className="py-2 rounded-xl bg-cyber-green/20 border border-cyber-green/40 text-cyber-green font-bold text-xs flex items-center justify-center space-x-1 hover:bg-cyber-green/30"
+                className="py-2 bg-[#A30B37] text-white border-2 border-black text-xs font-bold uppercase flex items-center justify-center space-x-1 hover:bg-[#85082c] shadow-[2px_2px_0px_#000]"
               >
                 <Play className="w-3.5 h-3.5" />
                 <span>START</span>
@@ -384,7 +394,7 @@ export default function AdminPage() {
 
             <button
               onClick={() => sendConfigAction({ action: "reset" })}
-              className="py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center space-x-1 hover:text-white"
+              className="py-2 bg-white border-2 border-black text-xs font-bold uppercase flex items-center justify-center space-x-1 hover:bg-[#fff5e2] shadow-[2px_2px_0px_#000]"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>RESET</span>
@@ -392,156 +402,157 @@ export default function AdminPage() {
 
             <button
               onClick={() => sendConfigAction({ action: "adjust_time", adjustSeconds: 300 })}
-              className="py-2 rounded-xl bg-slate-800 border border-slate-700 text-cyber-cyan font-bold text-xs flex items-center justify-center space-x-1"
+              className="py-2 bg-white border-2 border-black text-xs font-bold uppercase flex items-center justify-center space-x-1 hover:bg-[#fff5e2] shadow-[2px_2px_0px_#000]"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>+5 MIN</span>
+              <span>+5M</span>
             </button>
           </div>
         </div>
 
         {/* Card 2: Solution Key Reveal & Round Management */}
-        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
-          <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center space-x-2">
-            <Zap className="w-4 h-4 text-cyber-magenta" />
-            <span>Master Answer Key & Reveal</span>
-          </h2>
+        <div className="p-5 bg-white border-2 border-black shadow-[3px_3px_0px_#000] space-y-3">
+          <div className="border-b border-black pb-2">
+            <h2 className="text-xs font-bold uppercase text-black">
+              [ SOLUTION REVEAL & ROUND RESET ]
+            </h2>
+          </div>
 
-          <p className="text-xs text-slate-400">
-            Toggling solution reveal immediately unlocks score breakdowns & victory confetti on all squad screens.
+          <p className="text-xs leading-relaxed text-black">
+            Toggling solutions unlocks verification scores and result cards on all squad screens.
           </p>
 
           <button
             onClick={() => sendConfigAction({ action: "toggle_reveal" })}
-            className={`w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 transition ${
+            className={`w-full py-2.5 font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 border-2 border-black shadow-[2px_2px_0px_#000] transition ${
               config?.answerKeyRevealed
-                ? "bg-cyber-green text-slate-950 shadow-green-glow"
-                : "bg-cyber-magenta hover:bg-cyber-magenta/90 text-white shadow-magenta-glow"
+                ? "bg-black text-white"
+                : "bg-[#A30B37] hover:bg-[#85082c] text-white"
             }`}
           >
             {config?.answerKeyRevealed ? (
               <>
-                <EyeOff className="w-4 h-4" />
+                <EyeOff className="w-3.5 h-3.5" />
                 <span>REVEALED (CLICK TO HIDE)</span>
               </>
             ) : (
               <>
-                <Eye className="w-4 h-4" />
+                <Eye className="w-3.5 h-3.5" />
                 <span>UNLOCK & REVEAL SOLUTIONS</span>
               </>
             )}
           </button>
 
-          <div className="pt-2">
+          <div className="pt-1">
             <button
               onClick={() => setIsWipeModalOpen(true)}
-              className="w-full py-2.5 rounded-xl bg-red-950/40 border border-red-800/60 text-red-400 font-bold text-xs uppercase flex items-center justify-center space-x-2 hover:bg-red-900/40"
+              className="w-full py-2 bg-white hover:bg-black hover:text-white border-2 border-black font-bold text-xs uppercase flex items-center justify-center space-x-1.5 transition shadow-[2px_2px_0px_#000]"
             >
-              <Trash2 className="w-4 h-4" />
-              <span>WIPE ALL ROUND SUBMISSIONS</span>
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>WIPE ROUND SUBMISSIONS</span>
             </button>
           </div>
         </div>
 
         {/* Card 3: Master Answer Key Quick Reference */}
-        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
-          <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center space-x-2">
-            <CheckCircle2 className="w-4 h-4 text-cyber-green" />
-            <span>Master Case Answer Key</span>
-          </h2>
+        <div className="p-5 bg-[#fff5e2] border-2 border-black shadow-[3px_3px_0px_#000] space-y-2.5">
+          <div className="border-b border-black pb-1.5">
+            <h2 className="text-xs font-bold uppercase text-black">
+              [ MASTER ANSWER KEY REFERENCE ]
+            </h2>
+          </div>
 
-          <div className="space-y-2 text-xs">
-            <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-slate-500 uppercase font-semibold">Q1 Killer: </span>
-              <span className="text-cyber-green font-bold">Dr. Aris Thorne</span>
+          <div className="space-y-1.5 text-xs">
+            <div className="p-2 bg-white border border-black">
+              <span className="text-[#6b7280] uppercase text-[10px] font-bold">Q1 KILLER: </span>
+              <span className="font-bold text-black">Dr. Aris Thorne</span>
             </div>
-            <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-slate-500 uppercase font-semibold">Q2 Vector: </span>
-              <span className="text-cyber-green font-bold">Liquid Nitrogen Flush</span>
+            <div className="p-2 bg-white border border-black">
+              <span className="text-[#6b7280] uppercase text-[10px] font-bold">Q2 VECTOR: </span>
+              <span className="font-bold text-black">Liquid Nitrogen Flush</span>
             </div>
-            <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-slate-500 uppercase font-semibold">Q3 Motive: </span>
-              <span className="text-cyber-green font-bold">Patent Theft & Erasure</span>
+            <div className="p-2 bg-white border border-black">
+              <span className="text-[#6b7280] uppercase text-[10px] font-bold">Q3 MOTIVE: </span>
+              <span className="font-bold text-black">Patent Theft & Erasure</span>
             </div>
-            <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-slate-500 uppercase font-semibold">Q4 Key Evidence: </span>
-              <span className="text-cyber-green font-bold">Git Commit #4092</span>
+            <div className="p-2 bg-white border border-black">
+              <span className="text-[#6b7280] uppercase text-[10px] font-bold">Q4 PROOF: </span>
+              <span className="font-bold text-black">Git Commit #4092</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Live Leaderboard Table Section */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-2xl">
-        <div className="flex justify-between items-center mb-6">
+      <div className="max-w-5xl mx-auto w-full bg-white border-2 border-black p-5 shadow-[4px_4px_0px_#000]">
+        <div className="flex justify-between items-center pb-3 mb-3 border-b-2 border-black">
           <div>
-            <h2 className="text-lg font-bold text-slate-100 flex items-center space-x-2">
-              <Users className="w-5 h-5 text-cyber-cyan" />
-              <span>Registered Squad Roster & Leaderboard</span>
+            <h2 className="text-sm font-black uppercase text-black">
+              [ REGISTERED SQUAD ROSTER & LEADERBOARD ]
             </h2>
-            <p className="text-xs text-slate-400">Updates live every 2 seconds</p>
+            <p className="text-[11px] text-[#6b7280] uppercase">Live updates every 2 seconds</p>
           </div>
 
-          <div className="text-xs font-semibold text-slate-400">
-            Total Squads: <span className="text-cyber-cyan font-bold">{submissions.length}</span>
+          <div className="text-xs font-bold uppercase text-black">
+            TOTAL SQUADS: <span className="text-[#A30B37]">{submissions.length}</span>
           </div>
         </div>
 
         {submissions.length === 0 ? (
-          <div className="p-12 text-center text-slate-500 text-sm">
+          <div className="p-8 text-center text-[#6b7280] text-xs uppercase">
             No investigator squads have registered yet. Share the app URL to begin!
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 text-slate-400 uppercase font-semibold">
-                  <th className="py-3 px-4">Rank</th>
-                  <th className="py-3 px-4">Squad</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Correct</th>
-                  <th className="py-3 px-4">Points</th>
-                  <th className="py-3 px-4">Time</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                <tr className="border-b-2 border-black bg-[#f5f5f5] text-black font-bold uppercase">
+                  <th className="p-2.5">Rank</th>
+                  <th className="p-2.5">Squad</th>
+                  <th className="p-2.5">Status</th>
+                  <th className="p-2.5">Accuracy</th>
+                  <th className="p-2.5">Score</th>
+                  <th className="p-2.5">Duration</th>
+                  <th className="p-2.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-black">
                 {submissions.map((s: any, idx: number) => (
-                  <tr key={s.teamName} className="hover:bg-slate-800/30 transition">
-                    <td className="py-3 px-4 font-mono font-bold text-slate-300">#{idx + 1}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-2.5 font-bold text-white">
-                        <div className="w-7 h-7 rounded-lg bg-cyber-cyan/10 border border-cyber-cyan/30 flex items-center justify-center text-cyber-cyan">
-                          <SquadIconDisplay iconId={s.squadBadge || "search"} className="w-4 h-4" />
+                  <tr key={s.teamName} className="hover:bg-[#fbfbf9]">
+                    <td className="p-2.5 font-bold">#{idx + 1}</td>
+                    <td className="p-2.5">
+                      <div className="flex items-center space-x-2 font-bold uppercase">
+                        <div className="w-6 h-6 border border-black bg-[#fff5e2] flex items-center justify-center">
+                          <SquadIconDisplay iconId={s.squadBadge || "search"} className="w-3.5 h-3.5" />
                         </div>
                         <span>{s.teamName}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="p-2.5 font-bold uppercase">
                       {s.isSubmitted ? (
-                        <span className="px-2.5 py-1 rounded bg-cyber-green/10 text-cyber-green font-bold border border-cyber-green/30">
-                          SUBMITTED
+                        <span className="px-2 py-0.5 border border-black bg-[#fff5e2] text-black text-[10px]">
+                          SEALED
                         </span>
                       ) : (
-                        <span className="px-2.5 py-1 rounded bg-cyber-cyan/10 text-cyber-cyan font-bold border border-cyber-cyan/30 animate-pulse">
+                        <span className="px-2 py-0.5 border border-black bg-[#f5f5f5] text-[#6b7280] text-[10px] animate-pulse">
                           INVESTIGATING
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-4 font-bold text-slate-200">
+                    <td className="p-2.5 font-bold">
                       {s.breakdown?.correctCount || 0} / 4
                     </td>
-                    <td className="py-3 px-4 font-mono font-black text-cyber-cyan glow-cyan text-sm">
+                    <td className="p-2.5 font-black text-black">
                       {s.score || 0} PTS
                     </td>
-                    <td className="py-3 px-4 font-mono text-slate-400">
+                    <td className="p-2.5 text-[#6b7280]">
                       {s.timeTakenSeconds || 0}s
                     </td>
-                    <td className="py-3 px-4 text-right space-x-2">
+                    <td className="p-2.5 text-right space-x-2">
                       {!s.isSubmitted && (
                         <button
                           onClick={() => sendSubAction({ action: "force_submit", teamName: s.teamName })}
-                          className="px-2.5 py-1 rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/40 hover:bg-yellow-500/30 font-bold text-[10px]"
+                          className="px-2 py-1 border border-black bg-[#fff5e2] hover:bg-black hover:text-white font-bold text-[10px] uppercase shadow-[1px_1px_0px_#000]"
                           title="Force End Squad Round"
                         >
                           FORCE SUBMIT
@@ -549,7 +560,7 @@ export default function AdminPage() {
                       )}
                       <button
                         onClick={() => sendSubAction({ action: "delete_team", teamName: s.teamName })}
-                        className="px-2 py-1 rounded bg-red-950/60 text-red-400 border border-red-800 hover:bg-red-900/60 font-bold text-[10px]"
+                        className="px-2 py-1 border border-black bg-white hover:bg-[#A30B37] hover:text-white font-bold text-[10px] uppercase shadow-[1px_1px_0px_#000]"
                         title="Delete Team"
                       >
                         DELETE
@@ -565,18 +576,19 @@ export default function AdminPage() {
 
       {/* WIPE ALL CONFIRMATION MODAL */}
       {isWipeModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-          <div className="w-full max-w-md bg-slate-900 border border-red-500/60 rounded-2xl p-6 text-center shadow-red-glow">
-            <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4 animate-bounce" />
-            <h3 className="text-lg font-bold text-white mb-2">WIPE ALL ROUND DATA?</h3>
-            <p className="text-xs text-slate-300 mb-6">
-              This will permanently delete all registered teams and submitted deductions for a brand new round!
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className="w-full max-w-md bg-[#fff5e2] border-3 border-black p-6 text-center shadow-[6px_6px_0px_#000]">
+            <h3 className="text-base font-black uppercase text-[#A30B37] mb-2">
+              [ WIPE ALL ROUND SUBMISSIONS? ]
+            </h3>
+            <p className="text-xs text-black mb-6 leading-relaxed">
+              This will permanently delete all registered teams and submitted deductions to reset for a fresh investigation round.
             </p>
 
             <div className="flex space-x-3">
               <button
                 onClick={() => setIsWipeModalOpen(false)}
-                className="flex-1 py-3 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-bold text-xs uppercase"
+                className="flex-1 py-2.5 border-2 border-black bg-white text-black font-bold text-xs uppercase hover:bg-[#f5f5f5]"
               >
                 CANCEL
               </button>
@@ -585,7 +597,7 @@ export default function AdminPage() {
                   sendSubAction({ action: "wipe_all" });
                   setIsWipeModalOpen(false);
                 }}
-                className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider shadow-red-glow"
+                className="flex-1 py-2.5 bg-[#A30B37] hover:bg-[#85082c] text-white border-2 border-black font-bold text-xs uppercase shadow-[2px_2px_0px_#000]"
               >
                 WIPE ALL DATA
               </button>
