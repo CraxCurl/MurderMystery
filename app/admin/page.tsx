@@ -46,15 +46,8 @@ export default function AdminPage() {
   const [reviewError, setReviewError] = useState("");
 
   useEffect(() => {
-    const saved = localStorage.getItem("aimurdle_admin_pass") || "admin123";
-    if (saved) {
-      setAdminPassword(saved);
-      fetch("/api/admin/submissions", {
-        headers: { "x-admin-password": saved },
-      }).then((res) => {
-        if (res.ok) setIsAuthenticated(true);
-      });
-    }
+    // Admin access is deliberately not persisted between visits.
+    localStorage.removeItem("aimurdle_admin_pass");
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
@@ -65,7 +58,6 @@ export default function AdminPage() {
     })
       .then((res) => {
         if (res.ok) {
-          localStorage.setItem("aimurdle_admin_pass", adminPassword);
           setIsAuthenticated(true);
         } else {
           setAuthError("Invalid Chief Inspector Access Key.");
