@@ -1,5 +1,6 @@
 "use client";
 
+
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
@@ -239,12 +240,12 @@ function GameContent() {
 
   if (securityError) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-cyber-bg">
-        <div className="p-8 max-w-md rounded-2xl bg-red-950/80 border border-red-600 shadow-red-glow space-y-4">
-          <AlertOctagon className="w-12 h-12 text-red-500 mx-auto animate-bounce" />
-          <h2 className="text-xl font-black text-white">ACCESS DENIED</h2>
-          <p className="text-xs text-red-300 leading-relaxed">{securityError}</p>
-          <p className="text-[10px] text-slate-400 font-mono">Redirecting to squad registration...</p>
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#fbfbf9] font-mono text-black">
+        <div className="p-8 max-w-md bg-[#fff5e2] border-3 border-black shadow-[6px_6px_0px_#000] space-y-4">
+          <AlertOctagon className="w-12 h-12 text-[#A30B37] mx-auto animate-bounce" />
+          <h2 className="text-xl font-black text-[#A30B37]">ACCESS DENIED</h2>
+          <p className="text-xs text-black leading-relaxed">{securityError}</p>
+          <p className="text-[10px] text-[#6b7280]">Redirecting to squad registration...</p>
         </div>
       </div>
     );
@@ -253,40 +254,40 @@ function GameContent() {
   // WAITING LOBBY SCREEN (when host has not started the round yet)
   if (roundStatus === "waiting" || teamSubmission?.teamStatus === "waiting") {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-cyber-bg text-center">
-        <div className="max-w-lg w-full bg-slate-900/90 border border-cyber-cyan/50 rounded-2xl p-8 shadow-cyan-glow space-y-6">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-400 text-xs font-bold uppercase tracking-widest animate-pulse">
-            <Clock className="w-4 h-4" />
+      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-[#fbfbf9] text-center font-mono text-black">
+        <div className="max-w-lg w-full bg-[#fff5e2] border-3 border-black p-8 shadow-[6px_6px_0px_#000] space-y-6">
+          <div className="inline-flex items-center space-x-2 px-4 py-1.5 border-2 border-black bg-white text-black text-xs font-bold uppercase tracking-widest shadow-[2px_2px_0px_#000] animate-pulse">
+            <Clock className="w-4 h-4 text-[#A30B37]" />
             <span>WAITING FOR HOST TO START ROUND</span>
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-2xl font-black text-white tracking-wider">SYSTEM STANDBY</h1>
-            <p className="text-xs text-slate-400">
+            <h1 className="text-2xl font-black text-black tracking-wider">[ SYSTEM STANDBY ]</h1>
+            <p className="text-xs text-black leading-relaxed">
               Your squad has successfully registered. All investigation teams start simultaneously when the host triggers the round timer.
             </p>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+          <div className="p-4 bg-white border-2 border-black shadow-[3px_3px_0px_#000] flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="p-2.5 rounded-xl bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan">
+              <div className="p-2.5 border-2 border-black bg-[#fff5e2] text-black">
                 <SquadIconDisplay iconId={squadBadge} className="w-6 h-6" />
               </div>
               <div className="text-left">
-                <div className="text-xs font-bold text-white">{teamName || "Squad"}</div>
-                <div className="text-[10px] text-cyber-cyan font-mono">
+                <div className="text-xs font-bold text-black uppercase">{teamName || "Squad"}</div>
+                <div className="text-[10px] text-[#A30B37] font-bold uppercase">
                   {caseData?.title ? `Case Dossier: ${caseData.title}` : "Assigned Case Dossier Loading..."}
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-cyber-green/10 border border-cyber-green/30 text-cyber-green text-xs font-bold">
-              <span className="w-2 h-2 rounded-full bg-cyber-green animate-ping" />
+            <div className="flex items-center space-x-1.5 px-3 py-1 border-2 border-black bg-[#fff5e2] text-black text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-[#A30B37] animate-ping" />
               <span>READY</span>
             </div>
           </div>
 
-          <div className="pt-2 text-[11px] text-slate-400 flex items-center justify-center space-x-2">
-            <Cpu className="w-4 h-4 text-cyber-cyan animate-spin" />
+          <div className="pt-2 text-[11px] text-[#6b7280] flex items-center justify-center space-x-2">
+            <Cpu className="w-4 h-4 text-[#A30B37] animate-spin" />
             <span>Polling host command signal every 2s...</span>
           </div>
         </div>

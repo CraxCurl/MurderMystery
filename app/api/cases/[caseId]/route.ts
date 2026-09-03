@@ -4,14 +4,42 @@ import fs from "fs/promises";
 
 export const dynamic = "force-dynamic";
 
+function hashString(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { caseId: string } }
 ) {
   try {
-    const caseId = params.caseId || "ghost-in-the-model";
-    const filePath = path.join(process.cwd(), "data", "cases", `${caseId}.json`);
+    let targetCaseId = params.caseId || "ghost-in-the-model";
+    const casesDir = path.join(process.cwd(), "data", "cases");
+
+    if (targetCaseId === "random") {
+      const { searchParams } = new URL(request.url);
+      const teamName = searchParams.get("teamName") || "";
+      const files = await fs.readdir(casesDir);
+      const jsonFiles = files.filter((f) => f.endsWith(".json"));
+
+      if (jsonFiles.length === 0) {
+        return NextResponse.json(
+          { success: false, error: "No case files found." },
+          { status: 404 }
+        );
+      }
+
+      const index = teamName ? hashString(teamName) % jsonFiles.length : Math.floor(Math.random() * jsonFiles.length);
+      const selectedFile = jsonFiles[index];
+      targetCaseId = selectedFile.replace(/\.json$/, "");
+    }
+
+    const filePath = path.join(casesDir, `${targetCaseId}.json`);
 
     try {
       const data = await fs.readFile(filePath, "utf-8");
@@ -22,11 +50,12 @@ export async function GET(
 
       return NextResponse.json({
         success: true,
+        caseId: targetCaseId,
         case: publicCaseData,
       });
     } catch {
       return NextResponse.json(
-        { success: false, error: `Case file '${caseId}' not found.` },
+        { success: false, error: `Case file '${targetCaseId}' not found.` },
         { status: 404 }
       );
     }
@@ -37,3 +66,4 @@ export async function GET(
     );
   }
 }
+
